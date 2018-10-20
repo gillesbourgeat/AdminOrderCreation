@@ -1,0 +1,489 @@
+{form name="admin-order-creation.create"}
+<form method="POST" action="{url path="/admin/admin-order-creation/ajax/modal/create"}">
+
+    {form_field field='action'}
+        <input type="hidden" name="{$name}" value="create" />
+    {/form_field}
+
+    {if $form_error}<div class="alert alert-danger">{$form_error_message nofilter}</div>{/if}
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="alert alert-info">
+                {$currency_id = 0}
+                {form_field field='currency_id'}
+                    {capture name="currency"}
+                        <select name="{$name}" class="js-field-currency">
+                            {loop type="currency" name="currency"}
+                                <option value="{$ID}" {if !$data and $IS_DEFAULT}selected{/if}{if $data == $ID}selected{/if}>{$SYMBOL}</option>
+                                {if $data == $ID}
+                                    {$currency_id = $ID}
+                                {/if}
+                                {if !$data and $IS_DEFAULT}
+                                    {$currency_id = $ID}
+                                {/if}
+                            {/loop}
+                        </select>
+                    {/capture}
+                    {intl l="This order use the currency : %currency" d="adminordercreation.bo.default" currency=$smarty.capture.currency}
+                {/form_field}
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="alert alert-info">
+                {$country_id = 0}
+                {form_field field='country_id'}
+                {capture name="country"}
+                    <select name="{$name}" class="js-field-country">
+                        {loop type="country" name="country"}
+                            <option value="{$ID}" {if !$data and $IS_DEFAULT}selected{/if}{if $data == $ID}selected{/if}>{$TITLE}</option>
+                        {if $data == $ID}
+                            {$country_id = $ID}
+                        {/if}
+                        {if !$data and $IS_DEFAULT}
+                            {$country_id = $ID}
+                        {/if}
+                        {/loop}
+                    </select>
+                {/capture}
+                {intl l="This order use the country : %country" d="adminordercreation.bo.default" country=$smarty.capture.country}
+                {/form_field}
+            </div>
+        </div>
+
+        {* status select *}
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>{intl l="Status : " d="adminordercreation.bo.default"}</label>
+                {form_field field='status_id'}
+                    <select class="form-control js-select-status" name="{$name}">
+                        {loop type="order-status" name="order-status"}
+                            <option value="{$ID}" {if $order->getStatusId() == $ID}selected{/if} data-color="{$COLOR}">
+                                {if $TITLE}{$TITLE}{else}{$CODE}{/if}
+                            </option>
+                        {/loop}
+                    </select>
+                {/form_field}
+            </div>
+        </div>
+
+        {* customer select *}
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>{intl l="Customer : " d="adminordercreation.bo.default"}</label>
+                {form_field field='customer_id'}
+                    <select class="form-control js-select-customer" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" data-url="{url path="/admin/admin-order-creation/ajax/search/customer"}">
+                        {if $order->getCustomer()}
+                            {loop type="customer" name="customer" backend_context=true current=false id=$order->getCustomer()->getId()}
+                                <option value="{$ID}">{$REF} : ({$FIRSTNAME} {$LASTNAME})</option>
+                            {/loop}
+                        {else}
+                            <option value="">{intl l="Search..." d="adminordercreation.bo.default"}</option>
+                        {/if}
+                    </select>
+                {/form_field}
+            </div>
+        </div>
+
+        {* delivery module *}
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>{intl l="Delivery module : " d="adminordercreation.bo.default"}</label>
+                {form_field field='delivery_module_id'}
+                    <select class="form-control js-select-delivery-module" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" >
+                        {loop type="module" name="module-delivery" module_type=2 active="yes"}
+                            <option value="{$ID}" {if $data == $ID}selected{/if}>{$TITLE}</option>
+                        {/loop}
+                    </select>
+                {/form_field}
+            </div>
+        </div>
+
+        {* payment module *}
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>{intl l="Payment module : " d="adminordercreation.bo.default"}</label>
+                {form_field field='payment_module_id'}
+                    <select class="form-control js-select-payment-module" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" >
+                        {loop type="module" name="module-payment" module_type=3 active="yes"}
+                            <option value="{$ID}" {if $data == $ID}selected{/if}>{$TITLE}</option>
+                        {/loop}
+                    </select>
+                {/form_field}
+            </div>
+        </div>
+
+        {* address invoice *}
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">{intl l="Invoice address" d="adminordercreation.bo.default"}</div>
+                <div class="panel-body">
+
+                    {$other = false}
+                    <div class="form-group">
+                        {form_field field='invoice_address_id'}
+                            {if !$data}
+                                {$other = true}
+                            {/if}
+                            <select class="form-control js-select-invoice-address" name="{$name}" {if !$order->getCustomer()}disabled{/if}>
+                                {if $order->getCustomer()}
+                                    {loop type="address" name="address-invoice" customer=$order->getCustomer()->getId()}
+                                        <option value="{$ID}" {if $data == $ID}selected{/if}>
+                                            ({$FIRSTNAME} {$LASTNAME}) : {$ADDRESS1} {$CITY} {$ZIPCODE}
+                                        </option>
+                                    {/loop}
+                                    <option value="" {if $other}selected{/if}>{intl l="Other" d="adminordercreation.bo.default"}</option>
+                                {/if}
+                            </select>
+                        {/form_field}
+                    </div>
+
+                    <div class="row js-other-area {if !$other or !$order->getCustomer()}hide{/if}">
+                        {form_field field='invoice_address_title'}
+                            <div class="form-group col-md-3">
+                                <label for="">{intl l="Title" d="adminordercreation.bo.default"}</label>
+                                <select name="{$name}" class="form-control" >
+                                    {loop type="title" name="title.invoice"}
+                                        <option value="{$ID}" {if $data == $ID}selected{/if} >{$LONG}</option>
+                                    {/loop}
+                                </select>
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_firstname'}
+                            <div class="form-group col-md-4">
+                                <label for="">{intl l="Firstname" d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_lastname'}
+                            <div class="form-group col-md-5">
+                                <label for="">{intl l="Lastname : " d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_address1'}
+                            <div class="form-group col-md-12">
+                                <label for="">{intl l="Address : " d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_address2'}
+                            <div class="form-group col-md-12">
+                                <label for="">{intl l="Address complement : " d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_city'}
+                            <div class="form-group col-md-6">
+                                <label for="">{intl l="City : " d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_zipcode'}
+                            <div class="form-group col-md-6">
+                                <label for="">{intl l="Zipcode : " d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_country_id'}
+                            <div class="form-group col-md-6">
+                                <label for="">{intl l="Country : " d="adminordercreation.bo.default"}</label>
+                                <select name="{$name}"  class="form-control">
+                                    {if $data}
+                                        {$data = 64}
+                                        {loop type="country" name="country-address-invoice"}
+                                        {if $IS_DEFAULT}
+                                            {$data = $ID}
+                                        {/if}
+                                        {/loop}
+                                    {/if}
+                                    {loop type="country" name="country-address-invoice" visible=true}
+                                        <option value="{$ID}" {if $data == $ID}selected{/if}>{$TITLE}</option>
+                                    {/loop}
+                                </select>
+                            </div>
+                        {/form_field}
+                        {form_field field='invoice_address_company'}
+                            <div class="form-group col-md-6">
+                                <label for="">{intl l="Company : " d="adminordercreation.bo.default"}</label>
+                                <input type="text" name="{$name}" class="form-control" value="{$data}" />
+                            </div>
+                        {/form_field}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {* delivery invoice *}
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">{intl l="Delivery address" d="adminordercreation.bo.default"}</div>
+                <div class="panel-body">
+
+                    {$other = false}
+                    <div class="form-group">
+                        {form_field field='delivery_address_id'}
+                            {if !$data}
+                                {$other = true}
+                            {/if}
+                            <select class="form-control js-select-delivery-address" name="{$name}" {if !$order->getCustomer()}disabled{/if}>
+                                {if $order->getCustomer()}
+                                    {loop type="address" name="address-delivery" customer=$order->getCustomer()->getId()}
+                                        <option value="{$ID}" {if $data == $ID}selected{/if}>
+                                            ({$FIRSTNAME} {$LASTNAME}) : {$ADDRESS1} {$CITY} {$ZIPCODE}
+                                        </option>
+                                    {/loop}
+                                    <option value="" {if $other}selected{/if}>{intl l="Other" d="adminordercreation.bo.default"}</option>
+                                {/if}
+                            </select>
+                        {/form_field}
+                    </div>
+
+                    <div class="row js-other-area {if !$other or !$order->getCustomer()}hide{/if}">
+                        {form_field field='delivery_address_title'}
+                            <div class="form-group col-md-3">
+                                <label for="">{intl l="Title" d="adminordercreation.bo.default"}</label>
+                                <select name="{$name}" class="form-control" >
+                                    {loop type="title" name="title-delivery"}
+                                        <option value="{$ID}" {if $data == $ID}selected{/if} >{$LONG}</option>
+                                    {/loop}
+                                </select>
+                            </div>
+                        {/form_field}
+                        {form_field field='delivery_address_firstname'}
+                        <div class="form-group col-md-4">
+                            <label for="">{intl l="Firstname : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_lastname'}
+                        <div class="form-group col-md-5">
+                            <label for="">{intl l="Lastname : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_address1'}
+                        <div class="form-group col-md-12">
+                            <label for="">{intl l="Address : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_address2'}
+                        <div class="form-group col-md-12">
+                            <label for="">{intl l="Address complement : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_city'}
+                        <div class="form-group col-md-6">
+                            <label for="">{intl l="City : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_zipcode'}
+                        <div class="form-group col-md-6">
+                            <label for="">{intl l="Zipcode : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_country_id'}
+                        <div class="form-group col-md-6">
+                            <label for="">{intl l="Country : " d="adminordercreation.bo.default"}</label>
+                            <select name="{$name}"  class="form-control">
+                                {if $data}
+                                    {$data = 64}
+                                    {loop type="country" name="country-address-delivery"}
+                                        {if $IS_DEFAULT}
+                                            {$data = $ID}
+                                        {/if}
+                                    {/loop}
+                                {/if}
+                                {loop type="country" name="country-address-delivery" visible=true}
+                                <option value="{$ID}" {if $data == $ID}selected{/if}>{$TITLE}</option>
+                                {/loop}
+                            </select>
+                        </div>
+                        {/form_field}
+                        {form_field field='delivery_address_company'}
+                        <div class="form-group col-md-6">
+                            <label for="">{intl l="Company : " d="adminordercreation.bo.default"}</label>
+                            <input type="text" name="{$name}" class="form-control" value="{$data}"/>
+                        </div>
+                        {/form_field}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {* Product *}
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{intl l="Products" d="adminordercreation.bo.default"}</div>
+                <div class="panel-body">
+                    {$count = 0}
+                    {form_field field='product_id'}
+                        {foreach from=$data item=item key=key}
+                            {if $key > $count}
+                                {$count = $key}
+                            {/if}
+                        {/foreach}
+                    {/form_field}
+
+                    <table class="table js-table-product-line">
+                        <thead>
+                            <tr>
+                                <th width="30%">
+                                    {intl l="Product" d="adminordercreation.bo.default"}
+                                </th>
+                                <th width="25%">
+                                    {intl l="Product sale element" d="adminordercreation.bo.default"}
+                                </th>
+                                <th width="10%">
+                                    {intl l="Quantity" d="adminordercreation.bo.default"}
+                                </th>
+                                <th width="15%">
+                                    {intl l="Reduction" d="adminordercreation.bo.default"}
+                                </th>
+                                <th width="15%">
+                                    {intl l="Price" d="adminordercreation.bo.default"}
+                                </th>
+                                <th width="5%">
+                                    <button class="btn btn-success js-action-add" data-key="{$count}" title="{intl l="Add product" d="adminordercreation.bo.default"}">+</button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {form_field field='product_id'}
+                                {foreach from=$data item=item key=key}
+                                    {include file="admin-order-creation/include/product-line.html"}
+                                {/foreach}
+                            {/form_field}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+        {* Shipping *}
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{intl l="Shipping" d="adminordercreation.bo.default"}</div>
+                <div class="panel-body js-shipping-area">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {form_field field='shipping_price'}
+                            <div class="form-group">
+                                <label for="">{intl l="Price without tax : " d="adminordercreation.bo.default"}</label>
+                                <input name="{$name}" class="form-control js-field-amount-without-tax" type="number" min="0" step="0.000001" value="{$data}" data-url="{url path="/admin/product/calculate-raw-price?action=to_tax"}" />
+                            </div>
+                            {/form_field}
+                        </div>
+
+                        <div class="col-md-4">
+                            {form_field field='shipping_tax_rule_id'}
+                            <div class="form-group">
+                                <label for="">{intl l="Tax rule : " d="adminordercreation.bo.default"}</label>
+                                <select name="{$name}" class="form-control js-field-tax-rule" name="{$name}" data-url="{url path="/admin/product/calculate-raw-price?action=from_tax"}">
+                                    {loop type="tax-rule" name="tax-rule"}
+                                        <option value="{$ID}" {if $data == $ID}selected{/if}>{$TITLE}</option>
+                                    {/loop}
+                                </select>
+                            </div>
+                            {/form_field}
+                        </div>
+
+                        <div class="col-md-4">
+                            {form_field field='shipping_price_with_tax'}
+                            <div class="form-group">
+                                <label for="">{intl l="Price with tax : " d="adminordercreation.bo.default"}</label>
+                                <input name="{$name}" class="form-control js-field-amount-with-tax" type="number" min="0" step="0.000001" value="{$data}" data-url="{url path="/admin/product/calculate-raw-price?action=from_tax"}" />
+                            </div>
+                            {/form_field}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {* Global reduction *}
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{intl l="Global reduction" d="adminordercreation.bo.default"}</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                {form_field field='reduction_type'}
+                                    <div class="form-group">
+                                        <label for="">{intl l="Type : " d="adminordercreation.bo.default"}</label>
+                                        <select class="form-control js-action-refresh" name="{$name}">
+                                            <option value="1" {if $data == 1}selected{/if}>{intl l="Percentage" d="adminordercreation.bo.default"}</option>
+                                            {*<option value="2" {if $data == 2}selected{/if}>{intl l="Global amount" d="adminordercreation.bo.default"}</option>*}
+                                        </select>
+                                    </div>
+                                {/form_field}
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            {form_field field='reduction'}
+                                <div class="form-group">
+                                    <label for="">{intl l="Value : " d="adminordercreation.bo.default"}</label>
+                                    <input class="form-control js-action-refresh" type="number" min="0" step="0.01" name="{$name}" value="{$data}" />
+                                </div>
+                            {/form_field}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{intl l="Order Informations : " d="adminordercreation.bo.default"}</div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <h2>
+                                <span>{intl l="Total HT : " d="adminordercreation.bo.default"}</span><span>
+                                    {format_money number=$order->getTotalAmountWithoutTax() currency_id=$order->getCurrency()->getId()} HT
+                                </span>
+                            </h2>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h2>
+                                <span>{intl l="Tax : " d="adminordercreation.bo.default"}</span><span>
+                                    {format_money number={$order->getTotalAmountWithTax()-$order->getTotalAmountWithoutTax()} currency_id=$order->getCurrency()->getId()}
+                                </span>
+                            </h2>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <h2>
+                                <span>{intl l="Total TTC : " d="adminordercreation.bo.default"}</span><span>
+                                    {format_money number=$order->getTotalAmountWithTax() currency_id=$order->getCurrency()->getId()} TTC
+                                </span>
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 modal-footer">
+
+            <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove"></span>
+                {intl l="Cancel" d="creditnote.bo.default"}
+            </button>
+
+            <button type="submit" class="btn btn-primary">
+                {intl l="Create order" d="adminordercreation.bo.default"}
+            </button>
+
+        </div>
+
+
+    </div>
+</form>
+{/form}
