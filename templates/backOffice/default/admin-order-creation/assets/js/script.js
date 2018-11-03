@@ -2,6 +2,9 @@
     var $modal = $('#modal-order-creation');
     var currentRequest;
 
+    // fix bug bootstrap 3 and select2
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
     var timer = null;
     function refreshWithTimer($form, event) {
         if (timer !== null) {
@@ -384,18 +387,17 @@
         }, 100, data);
     };
 
-    $('#btn-create-order').on('click', function(){
+    $('body').on('click', '#btn-create-order', function(){
         $modal.modal('show');
-    });
+        var customerId = $(this).data('customerId');
 
-    $modal.on('show.bs.modal', function(event){
         $modal.loadAjax(event, {
-            'admin-order-creation-create[action]': 'open'
+            'admin-order-creation-create[action]': 'open',
+            'admin-order-creation-create[customer_id]': customerId
         });
     });
 
     $modal.on('hidden.bs.modal', function(){
         $modal.reset();
     });
-
 }());
