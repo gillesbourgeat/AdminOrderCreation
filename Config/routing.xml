@@ -16,28 +16,4 @@
         <default key="_controller">AdminOrderCreation:Order:ajaxSearchProduct</default>
     </route>
 
-    <!--
-
-    if a /admin/module/adminordercreation/ route is provided, a "Configuration" button will be displayed
-    for the module in the module list. Clicking this button will invoke this route.
-
-    <route id="my_route_id" path="/admin/module/adminordercreation">
-        <default key="_controller">AdminOrderCreation\Full\Class\Name\Of\YourConfigurationController::methodName</default>
-    </route>
-
-    <route id="my_route_id" path="/admin/module/adminordercreation/route-name">
-        <default key="_controller">AdminOrderCreation\Full\Class\Name\Of\YourAdminController::methodName</default>
-    </route>
-
-    <route id="my_route_id" path="/my/route/name">
-        <default key="_controller">AdminOrderCreation\Full\Class\Name\Of\YourOtherController::methodName</default>
-    </route>
-
-    ...add as many routes as required.
-
-    <route>
-    ...
-    </route>
-    -->
-
 </routes>

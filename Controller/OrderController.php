@@ -4,15 +4,19 @@ namespace AdminOrderCreation\Controller;
 
 use AdminOrderCreation\Util\Calc;
 use AdminOrderCreation\Util\CriteriaSearchTrait;
+use CreditNote\Model\CreditNote;
+use CreditNote\Model\CreditNoteOrder;
+use CreditNote\Model\CreditNoteQuery;
+use CreditNote\Model\Map\CreditNoteAddressTableMap;
+use CreditNote\Model\Map\CreditNoteTableMap;
+use CreditNote\Model\OrderCreditNote;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
-use Thelia\Core\HttpFoundation\JsonResponse;
 use Thelia\Core\HttpFoundation\Request;
-use Thelia\Core\HttpKernel\Exception\RedirectException;
-use Thelia\Core\Template\Loop\AttributeCombination;
 use Thelia\Core\Template\Loop\ProductSaleElements;
 use Thelia\Model\AddressQuery;
 use Thelia\Model\CountryQuery;
@@ -30,12 +34,9 @@ use Thelia\Model\OrderProductTax;
 use Thelia\Model\OrderStatusQuery;
 use Thelia\Model\Product;
 use Thelia\Model\ProductI18n;
-use Thelia\Model\ProductPriceQuery;
 use Thelia\Model\ProductQuery;
-use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Model\TaxRuleI18n;
 use Thelia\Tools\I18n;
-use Thelia\Tools\URL;
 
 class OrderController extends BaseAdminController
 {
@@ -67,6 +68,8 @@ class OrderController extends BaseAdminController
         if (!$form->hasError() && 'create' === $formValidate->get('action')->getData()) {
             $order->save();
 
+            $this->performCreditNote($order, $formValidate);
+
             // pour retirer les stocks et générer la référence facture
             $this->getDispatcher()->dispatch(
                 TheliaEvents::ORDER_UPDATE_STATUS,
@@ -84,7 +87,8 @@ class OrderController extends BaseAdminController
             ]);
         } else {
             return $this->render('admin-order-creation/ajax/order-create-modal', [
-                'order' => $order
+                'order' => $order,
+                'hasCreditNoteModule' => $this->hasCreditNoteModule()
             ]);
         }
     }
@@ -175,6 +179,11 @@ class OrderController extends BaseAdminController
         }
 
         return new JsonResponse($json);
+    }
+
+    protected function hasCreditNoteModule()
+    {
+        return class_exists('\CreditNote\CreditNote');
     }
 
     protected function performOrder(Order $order, Form $formValidate)
@@ -303,6 +312,48 @@ class OrderController extends BaseAdminController
         }
 
         return $this;
+    }
+
+    protected function performCreditNote(Order $order, Form $form)
+    {
+        if (!$this->hasCreditNoteModule()) {
+            return $this;
+        }
+
+        $action = $form->get('action')->getData();
+
+        $creditNoteId = $form->get('credit_note_id')->getData();
+
+        if ($creditNoteId && $action === 'create') {
+            /** @var CreditNote $creditNote */
+            $creditNote = CreditNoteQuery::create()
+                ->filterById($creditNoteId)
+                ->useCreditNoteStatusQuery()
+                    ->filterByUsed(false)
+                    ->filterByInvoiced(true)
+                ->endUse()
+                ->findOne();
+
+            if (null === $creditNote) {
+                $form->addError(
+                    new FormError('Please select a valid credit note')
+                );
+            }
+
+            $orderCreditNote = (new OrderCreditNote())
+                ->setOrderId($order->getId())
+                ->setCreditNoteId($creditNote->getId());
+
+            if (round($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax(), 2) > 0) {
+                $orderCreditNote->setAmountPrice($creditNote->getTotalPriceWithTax());
+            } elseif (round($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax(), 2) < 0) {
+                $orderCreditNote->setAmountPrice(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()));
+            } else {
+                $orderCreditNote->setAmountPrice($creditNote->getTotalPriceWithTax());
+            }
+
+            $orderCreditNote->save();
+        }
     }
 
     protected function performInvoiceAddress(Order $order, Form $form)

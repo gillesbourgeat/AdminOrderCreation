@@ -440,6 +440,66 @@
             </div>
         </div>
 
+        {if $hasCreditNoteModule}
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">{intl l="Use Credit Note : " d="adminordercreation.bo.default"}</div>
+                    <div class="panel-body">
+                        <div class="row">
+                            {* customer select *}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{intl l="Credit note : " d="adminordercreation.bo.default"}</label>
+                                    {$credit_note_id = null}
+                                    {form_field field='credit_note_id'}
+                                        <select class="form-control js-select-credit-note" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" {if !$order->getCustomer()}disabled{/if}>
+                                            {if $order->getCustomer()}
+                                                {loop type="credit-note" name="credit-note" backend_context=true customer_id=$order->getCustomer()->getId() invoiced=true used=false}
+                                                    {if $data == $ID}
+                                                        {$credit_note_id = $ID}
+                                                    {/if}
+                                                    <option value="{$ID}" {if $ID == $data}selected{/if}>{$REF} - {$INVOICE_REF} : {format_money number=$TOTAL_PRICE_WITH_TAX currency_id=$CURRENCY_ID}</option>
+                                                {/loop}
+                                            {/if}
+                                            <option value="" {if !$data}selected{/if}>{intl l="Search..." d="adminordercreation.bo.default"}</option>
+                                        </select>
+                                    {/form_field}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                {if $credit_note_id}
+                                    {loop type="credit-note" name="credit-note" backend_context=true id=$credit_note_id}
+                                        <div class="alert alert-info">
+                                            {intl l="This command uses the credit note ref %ref for the amount of %amount with tax." d="adminordercreation.bo.default"
+                                            ref=$INVOICE_REF
+                                            amount={format_money number=$TOTAL_PRICE_WITH_TAX currency_id=$CURRENCY_ID}
+                                            }
+                                        </div>
+                                        {if $order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX == 0}
+
+                                        {elseif $order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX > 0}
+                                            <div class="alert alert-warning">
+                                                {intl l="Your customer will have to pay the difference of %amount with tax" d="adminordercreation.bo.default"
+                                                amount={format_money number={$order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX} currency_id=$CURRENCY_ID}
+                                                }
+                                            </div>
+                                        {else}
+                                            <div class="alert alert-warning">
+                                                {intl l="A new credit note of %amount with tax will be issued for this customer." d="adminordercreation.bo.default"
+                                                amount={format_money number=-{$order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX} currency_id=$CURRENCY_ID}
+                                                }
+                                            </div>
+                                        {/if}
+                                    {/loop}
+                                {/if}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        {/if}
+
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading">{intl l="Order Informations : " d="adminordercreation.bo.default"}</div>

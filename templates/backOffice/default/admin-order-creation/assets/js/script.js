@@ -27,6 +27,7 @@
                 return $(prefix + ' <span>' + data.text + '</span>');
             },
             templateSelection: function(data){
+                if (!data.id) return data.text;
                 var prefix = data.element.dataset.color ? '<span class="label" style="background-color: ' + data.element.dataset.color + ';width: 50px;">&nbsp;</span>' : '';
                 prefix += (data.element.dataset.ref ? ' <span style="font-weight: bold;">' + data.element.dataset.ref + '</span>' : '');
                 return $(prefix + ' <span>' + data.text + '</span>');
@@ -180,6 +181,7 @@
         var $selectProductSaleElement = initSelect($form.find('.js-select-product-sale-element'));
         var $selectInvoiceAddress = initSelect($form.find('.js-select-invoice-address'));
         var $selectDeliveryAddress = initSelect($form.find('.js-select-delivery-address'));
+        var $selectCreditNote = initSelect($form.find('.js-select-credit-note'));
 
         $form.on('submit', function(event){
             event.preventDefault();
@@ -221,6 +223,12 @@
         });
 
         $selectProductSaleElement.on('select2:select', function(event){
+            $modal.loadAjax(event, getFormData($form, {
+                'admin-order-creation-create[action]': 'refresh'
+            }));
+        });
+
+        $selectCreditNote.on('select2:select', function(event){
             $modal.loadAjax(event, getFormData($form, {
                 'admin-order-creation-create[action]': 'refresh'
             }));

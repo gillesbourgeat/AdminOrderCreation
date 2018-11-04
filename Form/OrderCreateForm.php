@@ -172,7 +172,7 @@ class OrderCreateForm extends BaseForm
                 'required' => false,
                 'empty_data' => 0
             ))
-            ->add('shipping_tax_rule_id', NumberType::class, array(
+            ->add('shipping_tax_rule_id', IntegerType::class, array(
                 'required' => false
             ))
             ->add('shipping_price_with_tax', TextType::class, array(
@@ -189,5 +189,9 @@ class OrderCreateForm extends BaseForm
             ))
         ;
 
+        $this->formBuilder
+            ->add('credit_note_id', IntegerType::class, array(
+                'required' => false
+            ));
     }
 }
