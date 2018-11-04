@@ -142,7 +142,7 @@
                     <div class="row js-other-area {if !$other or !$order->getCustomer()}hide{/if}">
                         {form_field field='invoice_address_title'}
                             <div class="form-group col-md-3">
-                                <label for="">{intl l="Title" d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Title :" d="adminordercreation.bo.default"}</label>
                                 <select name="{$name}" class="form-control" >
                                     {loop type="title" name="title.invoice"}
                                         <option value="{$ID}" {if $data == $ID}selected{/if} >{$LONG}</option>
@@ -152,43 +152,43 @@
                         {/form_field}
                         {form_field field='invoice_address_firstname'}
                             <div class="form-group col-md-4">
-                                <label for="">{intl l="Firstname" d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Firstname :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
                         {form_field field='invoice_address_lastname'}
                             <div class="form-group col-md-5">
-                                <label for="">{intl l="Lastname : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Lastname :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
                         {form_field field='invoice_address_address1'}
                             <div class="form-group col-md-12">
-                                <label for="">{intl l="Address : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Address :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
                         {form_field field='invoice_address_address2'}
                             <div class="form-group col-md-12">
-                                <label for="">{intl l="Address complement : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Address complement :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
                         {form_field field='invoice_address_city'}
                             <div class="form-group col-md-6">
-                                <label for="">{intl l="City : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="City :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
                         {form_field field='invoice_address_zipcode'}
                             <div class="form-group col-md-6">
-                                <label for="">{intl l="Zipcode : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Zipcode :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
                         {form_field field='invoice_address_country_id'}
                             <div class="form-group col-md-6">
-                                <label for="">{intl l="Country : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Country :" d="adminordercreation.bo.default"}</label>
                                 <select name="{$name}"  class="form-control">
                                     {if $data}
                                         {$data = 64}
@@ -206,7 +206,7 @@
                         {/form_field}
                         {form_field field='invoice_address_company'}
                             <div class="form-group col-md-6">
-                                <label for="">{intl l="Company : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Company :" d="adminordercreation.bo.default"}</label>
                                 <input type="text" name="{$name}" class="form-control" value="{$data}" />
                             </div>
                         {/form_field}
@@ -244,7 +244,7 @@
                     <div class="row js-other-area {if !$other or !$order->getCustomer()}hide{/if}">
                         {form_field field='delivery_address_title'}
                             <div class="form-group col-md-3">
-                                <label for="">{intl l="Title" d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Title :" d="adminordercreation.bo.default"}</label>
                                 <select name="{$name}" class="form-control" >
                                     {loop type="title" name="title-delivery"}
                                         <option value="{$ID}" {if $data == $ID}selected{/if} >{$LONG}</option>
@@ -254,43 +254,43 @@
                         {/form_field}
                         {form_field field='delivery_address_firstname'}
                         <div class="form-group col-md-4">
-                            <label for="">{intl l="Firstname : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Firstname :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
                         {form_field field='delivery_address_lastname'}
                         <div class="form-group col-md-5">
-                            <label for="">{intl l="Lastname : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Lastname :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
                         {form_field field='delivery_address_address1'}
                         <div class="form-group col-md-12">
-                            <label for="">{intl l="Address : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Address :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
                         {form_field field='delivery_address_address2'}
                         <div class="form-group col-md-12">
-                            <label for="">{intl l="Address complement : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Address complement :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
                         {form_field field='delivery_address_city'}
                         <div class="form-group col-md-6">
-                            <label for="">{intl l="City : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="City :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
                         {form_field field='delivery_address_zipcode'}
                         <div class="form-group col-md-6">
-                            <label for="">{intl l="Zipcode : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Zipcode :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
                         {form_field field='delivery_address_country_id'}
                         <div class="form-group col-md-6">
-                            <label for="">{intl l="Country : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Country :" d="adminordercreation.bo.default"}</label>
                             <select name="{$name}"  class="form-control">
                                 {if $data}
                                     {$data = 64}
@@ -308,7 +308,7 @@
                         {/form_field}
                         {form_field field='delivery_address_company'}
                         <div class="form-group col-md-6">
-                            <label for="">{intl l="Company : " d="adminordercreation.bo.default"}</label>
+                            <label for="">{intl l="Company :" d="adminordercreation.bo.default"}</label>
                             <input type="text" name="{$name}" class="form-control" value="{$data}"/>
                         </div>
                         {/form_field}
@@ -447,7 +447,7 @@
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <h2>
-                                <span>{intl l="Total HT : " d="adminordercreation.bo.default"}</span><span>
+                                <span>{intl l="Total without tax : " d="adminordercreation.bo.default"}</span><span>
                                     {format_money number=$order->getTotalAmountWithoutTax() currency_id=$order->getCurrency()->getId()} HT
                                 </span>
                             </h2>
@@ -461,7 +461,7 @@
                         </div>
                         <div class="col-md-4 text-center">
                             <h2>
-                                <span>{intl l="Total TTC : " d="adminordercreation.bo.default"}</span><span>
+                                <span>{intl l="Total with tax : " d="adminordercreation.bo.default"}</span><span>
                                     {format_money number=$order->getTotalAmountWithTax() currency_id=$order->getCurrency()->getId()} TTC
                                 </span>
                             </h2>
@@ -474,7 +474,7 @@
         <div class="col-md-12 modal-footer">
 
             <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove"></span>
-                {intl l="Cancel" d="creditnote.bo.default"}
+                {intl l="Cancel" d="adminordercreation.bo.default"}
             </button>
 
             <button type="submit" class="btn btn-primary">
