@@ -5,12 +5,14 @@ namespace AdminOrderCreation\Controller;
 use AdminOrderCreation\Util\Calc;
 use AdminOrderCreation\Util\CriteriaSearchTrait;
 use CreditNote\Model\CreditNote;
-use CreditNote\Model\CreditNoteOrder;
+use CreditNote\Model\CreditNoteAddress;
+use CreditNote\Model\CreditNoteDetail;
 use CreditNote\Model\CreditNoteQuery;
-use CreditNote\Model\Map\CreditNoteAddressTableMap;
-use CreditNote\Model\Map\CreditNoteTableMap;
+use CreditNote\Model\CreditNoteStatusQuery;
 use CreditNote\Model\OrderCreditNote;
+use InvoiceRef\EventListeners\OrderListener;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
+use Propel\Runtime\Propel;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Thelia\Controller\Admin\BaseAdminController;
@@ -19,11 +21,13 @@ use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Request;
 use Thelia\Core\Template\Loop\ProductSaleElements;
 use Thelia\Model\AddressQuery;
+use Thelia\Model\Cart;
 use Thelia\Model\CountryQuery;
 use Thelia\Model\CurrencyQuery;
 use Thelia\Model\Customer;
 use Thelia\Model\CustomerQuery;
 use Thelia\Model\Map\AddressTableMap;
+use Thelia\Model\Map\OrderTableMap;
 use Thelia\Model\Map\ProductI18nTableMap;
 use AdminOrderCreation\Model\Order;
 use Symfony\Component\Form\Form;
@@ -48,6 +52,8 @@ class OrderController extends BaseAdminController
 
         $order->setLang($this->getLang());
 
+        $order->setDispatcher($this->getDispatcher());
+
         $form = $this->createForm('admin-order-creation.create', 'form', [], ['csrf_protection' => false]);
 
         $formValidate = $this->validateForm($form, 'post');
@@ -66,15 +72,34 @@ class OrderController extends BaseAdminController
         }
 
         if (!$form->hasError() && 'create' === $formValidate->get('action')->getData()) {
-            $order->save();
+            $con = Propel::getServiceContainer()->getWriteConnection(OrderTableMap::DATABASE_NAME);
 
-            $this->performCreditNote($order, $formValidate);
+            // use transaction because $criteria could contain info
+            // for more than one table (I guess, conceivably)
+            $con->beginTransaction();
+
+            try {
+                $cart = new Cart();
+
+                $cart->save();
+
+                $order->setCartId($cart->getId());
+
+                $order->save();
+                $this->performCreditNote($order, $formValidate);
+                $con->commit();
+            } catch (\Exception $e) {
+                $con->rollBack();
+                throw $e;
+            }
 
             // pour retirer les stocks et générer la référence facture
             $this->getDispatcher()->dispatch(
                 TheliaEvents::ORDER_UPDATE_STATUS,
                 (new OrderEvent($order))->setStatus($order->getStatusId())
             );
+
+            $order->save();
 
         /*    return $this->generateRedirectFromRoute('admin.order.update.view', [], [
                 'order_id' => $order->getId()
@@ -88,7 +113,7 @@ class OrderController extends BaseAdminController
         } else {
             return $this->render('admin-order-creation/ajax/order-create-modal', [
                 'order' => $order,
-                'hasCreditNoteModule' => $this->hasCreditNoteModule()
+                'hasCreditNoteModule' => $this->hasCreditNoteModule(),
             ]);
         }
     }
@@ -151,14 +176,17 @@ class OrderController extends BaseAdminController
     {
         $productQuery = ProductQuery::create();
 
-        $productQuery->useI18nQuery();
-
-        $this->whereConcatRegex($productQuery, array(
-            'product_i18n.TITLE'
-        ), $request->get('q'));
+        $productQuery->useI18nQuery(
+            $this->getRequest()->getSession()->getAdminEditionLang()->getLocale()
+        );
 
         $productQuery
             ->withColumn(ProductI18nTableMap::TITLE, 'TITLE');
+
+        $this->whereConcatRegex($productQuery, array(
+            'product.REF',
+            'product_i18n.TITLE'
+        ), $request->get('q'));
 
         $productQuery->setLimit(10);
 
@@ -344,15 +372,80 @@ class OrderController extends BaseAdminController
                 ->setOrderId($order->getId())
                 ->setCreditNoteId($creditNote->getId());
 
-            if (round($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax(), 2) > 0) {
+            if (round($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax(), 2) > 0) { // cas crédit note plus petit
                 $orderCreditNote->setAmountPrice($creditNote->getTotalPriceWithTax());
-            } elseif (round($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax(), 2) < 0) {
-                $orderCreditNote->setAmountPrice(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()));
-            } else {
+            } elseif (round($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax(), 2) < 0) { // cas crédit note plus grand
+                $orderCreditNote->setAmountPrice($order->getTotalAmountWithTax());
+
+                // copy address
+                $lastInvoiceAddress = $creditNote->getCreditNoteAddress();
+                $invoiceAddress = (new CreditNoteAddress())
+                    ->setFirstname($lastInvoiceAddress->getFirstname())
+                    ->setLastname($lastInvoiceAddress->getLastname())
+                    ->setCity($lastInvoiceAddress->getCity())
+                    ->setZipcode($lastInvoiceAddress->getZipcode())
+                    ->setAddress1($lastInvoiceAddress->getAddress1())
+                    ->setAddress2($lastInvoiceAddress->getAddress2())
+                    ->setAddress3($lastInvoiceAddress->getAddress3())
+                    ->setCustomerTitleId($lastInvoiceAddress->getCustomerTitleId())
+                    ->setCountryId($lastInvoiceAddress->getCountryId());
+
+                $invoiceAddress->save();
+
+                $crediNoteDetail = (new CreditNoteDetail())
+                    ->setTitle('Remboursement différence')
+                    ->setTaxRuleId(null)
+                    ->setPriceWithTax(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()))
+                    ->setPrice(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()))
+                    ->setType('other');
+
+                $newCreditNote = (new CreditNote())
+                    ->setCurrency($creditNote->getCurrency())
+                    ->setTypeId(4)
+                    ->setStatusId(4)
+                    ->setCreditNoteAddress($invoiceAddress)
+                    ->addCreditNoteDetail($crediNoteDetail)
+                    ->setTotalPrice(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()))
+                    ->setTotalPriceWithTax(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()))
+                    ->setCustomerId($creditNote->getCustomer()->getId())
+                    ->setParentId($creditNote->getId())
+                    ->setOrderId($order->getId());
+
+                    $newCreditNote->setDispatcher($this->getDispatcher());
+
+                    $newCreditNote->save();
+            } else { // cas crédit note égale
                 $orderCreditNote->setAmountPrice($creditNote->getTotalPriceWithTax());
             }
 
             $orderCreditNote->save();
+
+            $newStatus = CreditNoteStatusQuery::findNextCreditNoteUsedStatus($creditNote->getCreditNoteStatus());
+
+            // on passe par le statut payé
+            $order->setOrderStatus(
+                OrderStatusQuery::create()->findOneById(2)
+            );
+
+            $order->save();
+            // @todo
+            if (class_exists('\InvoiceRef\EventListeners\OrderListener')) {
+                // pour générer la référence commande
+                // on peut pas dispatcher l'event car crédit de fidélité crédité
+                $orderListener = new OrderListener();
+
+                //$orderListener->implementInvoice(new OrderEvent($order));
+            }
+
+            // on passe en traitement
+            $order->setOrderStatus(
+                OrderStatusQuery::create()->findOneById(3)
+            );
+
+            $order->save();
+
+            $creditNote->setCreditNoteStatus($newStatus);
+            $creditNote->save();
         }
     }
 
@@ -488,20 +581,12 @@ class OrderController extends BaseAdminController
         $productIds = $form->get('product_id')->getData();
         $quantities = $form->get('product_quantity')->getData();
         $productSaleElementIds = $form->get('product_sale_element_id')->getData();
-        $reduction = $form->get('product_reduction')->getData();
-        $reductionType = $form->get('product_reduction_type')->getData();
+        $productPriceWithoutTax = $form->get('product_price_without_tax')->getData();
+        $refreshPrice = $form->get('refresh_price')->getData();
 
         $currency = $this->getCurrency($form);
 
         foreach ($productIds as $key => $id) {
-            if (!isset($reduction[$key])) {
-                $reduction[$key] = 0;
-            }
-
-            if (!isset($reductionType[$key])) {
-                $reductionType[$key] = 1;
-            }
-
             if (!isset($quantities[$key])) {
                 $quantities[$key] = 1;
             }
@@ -546,22 +631,13 @@ class OrderController extends BaseAdminController
                 $product->getTaxRuleId()
             );
 
-            $price = $productSaleElement->getVirtualColumn('price_PRICE');
-            $promoPrice = $productSaleElement->getVirtualColumn('price_PROMO_PRICE');
-
-            $price = Calc::reduction(
-                $reduction[$key],
-                $reductionType[$key],
-                $price,
-                $quantities[$key]
-            );
-
-            $promoPrice = Calc::reduction(
-                $reduction[$key],
-                $reductionType[$key],
-                $promoPrice,
-                $quantities[$key]
-            );
+            if (isset($refreshPrice[$key]) && (int) $refreshPrice[$key]) {
+                $price = $productSaleElement->getVirtualColumn('price_PRICE');
+                $promoPrice = $productSaleElement->getVirtualColumn('price_PROMO_PRICE');
+            } else {
+                $price = isset($productPriceWithoutTax[$key]) ? (float) $productPriceWithoutTax[$key] : $productSaleElement->getVirtualColumn('price_PRICE');
+                $promoPrice = isset($productPriceWithoutTax[$key]) ? (float) $productPriceWithoutTax[$key] : $productSaleElement->getVirtualColumn('price_PROMO_PRICE');
+            }
 
             $taxDetail = $product->getTaxRule()->getTaxDetail(
                 $product,

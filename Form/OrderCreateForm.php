@@ -144,19 +144,22 @@ class OrderCreateForm extends BaseForm
                 'allow_add'    => true,
                 'allow_delete' => true
             ))
-            ->add('product_reduction', 'collection', array(
-                'required' => false,
-                'allow_add'    => true,
-                'allow_delete' => true,
-                'attr' => [
-                    'empty_data' => 0
-                ]
-            ))
-            ->add('product_reduction_type', 'collection', array(
+            ->add('product_price_with_tax', 'collection', array(
                 'required' => false,
                 'allow_add'    => true,
                 'allow_delete' => true
-            ));
+            ))
+            ->add('product_price_without_tax', 'collection', array(
+                'required' => false,
+                'allow_add'    => true,
+                'allow_delete' => true
+            ))
+            ->add('refresh_price', 'collection', array(
+                'required' => false,
+                'allow_add'    => true,
+                'allow_delete' => true
+            ))
+        ;
 
         $this->formBuilder
             ->add('reduction', TextType::class, array(

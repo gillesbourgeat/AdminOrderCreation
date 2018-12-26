@@ -55,7 +55,7 @@
         {* status select *}
         <div class="col-md-6">
             <div class="form-group">
-                <label>{intl l="Status : " d="adminordercreation.bo.default"}</label>
+                <label>{intl l="Status :" d="adminordercreation.bo.default"}</label>
                 {form_field field='status_id'}
                     <select class="form-control js-select-status" name="{$name}">
                         {loop type="order-status" name="order-status"}
@@ -71,7 +71,7 @@
         {* customer select *}
         <div class="col-md-6">
             <div class="form-group">
-                <label>{intl l="Customer : " d="adminordercreation.bo.default"}</label>
+                <label>{intl l="Customer :" d="adminordercreation.bo.default"}</label>
                 {form_field field='customer_id'}
                     <select class="form-control js-select-customer" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" data-url="{url path="/admin/admin-order-creation/ajax/search/customer"}">
                         {if $order->getCustomer()}
@@ -89,7 +89,7 @@
         {* delivery module *}
         <div class="col-md-6">
             <div class="form-group">
-                <label>{intl l="Delivery module : " d="adminordercreation.bo.default"}</label>
+                <label>{intl l="Delivery module :" d="adminordercreation.bo.default"}</label>
                 {form_field field='delivery_module_id'}
                     <select class="form-control js-select-delivery-module" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" >
                         {loop type="module" name="module-delivery" module_type=2 active="yes"}
@@ -103,7 +103,7 @@
         {* payment module *}
         <div class="col-md-6">
             <div class="form-group">
-                <label>{intl l="Payment module : " d="adminordercreation.bo.default"}</label>
+                <label>{intl l="Payment module :" d="adminordercreation.bo.default"}</label>
                 {form_field field='payment_module_id'}
                     <select class="form-control js-select-payment-module" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" >
                         {loop type="module" name="module-payment" module_type=3 active="yes"}
@@ -335,18 +335,15 @@
                         <thead>
                             <tr>
                                 <th width="30%">
-                                    {intl l="Product" d="adminordercreation.bo.default"}
+                                    {intl l="Product" d="adminordercreation.bo.default"} / {intl l="Product sale element" d="adminordercreation.bo.default"}
                                 </th>
-                                <th width="25%">
-                                    {intl l="Product sale element" d="adminordercreation.bo.default"}
+                                <th width="15%">
+                                    {intl l="Unit price with tax" d="adminordercreation.bo.default"}
                                 </th>
                                 <th width="10%">
                                     {intl l="Quantity" d="adminordercreation.bo.default"}
                                 </th>
-                                <th width="15%">
-                                    {intl l="Reduction" d="adminordercreation.bo.default"}
-                                </th>
-                                <th width="15%">
+                                <th width="20%">
                                     {intl l="Price" d="adminordercreation.bo.default"}
                                 </th>
                                 <th width="5%">
@@ -356,8 +353,8 @@
                         </thead>
                         <tbody>
                             {form_field field='product_id'}
-                                {foreach from=$data item=item key=key}
-                                    {include file="admin-order-creation/include/product-line.html"}
+                                {foreach from=$order->getOrderProducts() item=orderProduct key=key}
+                                    {include file="admin-order-creation/include/product-line.html" orderProduct=$orderProduct}
                                 {/foreach}
                             {/form_field}
                         </tbody>
@@ -376,7 +373,7 @@
                         <div class="col-md-4">
                             {form_field field='shipping_price'}
                             <div class="form-group">
-                                <label for="">{intl l="Price without tax : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Price without tax :" d="adminordercreation.bo.default"}</label>
                                 <input name="{$name}" class="form-control js-field-amount-without-tax" type="number" min="0" step="0.000001" value="{$data}" data-url="{url path="/admin/product/calculate-raw-price?action=to_tax"}" />
                             </div>
                             {/form_field}
@@ -385,7 +382,7 @@
                         <div class="col-md-4">
                             {form_field field='shipping_tax_rule_id'}
                             <div class="form-group">
-                                <label for="">{intl l="Tax rule : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Tax rule :" d="adminordercreation.bo.default"}</label>
                                 <select name="{$name}" class="form-control js-field-tax-rule" name="{$name}" data-url="{url path="/admin/product/calculate-raw-price?action=from_tax"}">
                                     {loop type="tax-rule" name="tax-rule"}
                                         <option value="{$ID}" {if $data == $ID}selected{/if}>{$TITLE}</option>
@@ -398,7 +395,7 @@
                         <div class="col-md-4">
                             {form_field field='shipping_price_with_tax'}
                             <div class="form-group">
-                                <label for="">{intl l="Price with tax : " d="adminordercreation.bo.default"}</label>
+                                <label for="">{intl l="Price with tax :" d="adminordercreation.bo.default"}</label>
                                 <input name="{$name}" class="form-control js-field-amount-with-tax" type="number" min="0" step="0.000001" value="{$data}" data-url="{url path="/admin/product/calculate-raw-price?action=from_tax"}" />
                             </div>
                             {/form_field}
@@ -418,7 +415,7 @@
                             <div class="form-group">
                                 {form_field field='reduction_type'}
                                     <div class="form-group">
-                                        <label for="">{intl l="Type : " d="adminordercreation.bo.default"}</label>
+                                        <label for="">{intl l="Type :" d="adminordercreation.bo.default"}</label>
                                         <select class="form-control js-action-refresh" name="{$name}">
                                             <option value="1" {if $data == 1}selected{/if}>{intl l="Percentage" d="adminordercreation.bo.default"}</option>
                                             {*<option value="2" {if $data == 2}selected{/if}>{intl l="Global amount" d="adminordercreation.bo.default"}</option>*}
@@ -430,7 +427,7 @@
                         <div class="col-md-3">
                             {form_field field='reduction'}
                                 <div class="form-group">
-                                    <label for="">{intl l="Value : " d="adminordercreation.bo.default"}</label>
+                                    <label for="">{intl l="Value :" d="adminordercreation.bo.default"}</label>
                                     <input class="form-control js-action-refresh" type="number" min="0" step="0.01" name="{$name}" value="{$data}" />
                                 </div>
                             {/form_field}
@@ -443,16 +440,17 @@
         {if $hasCreditNoteModule}
             <div class="col-md-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading">{intl l="Use Credit Note : " d="adminordercreation.bo.default"}</div>
+                    <div class="panel-heading">{intl l="Use Credit Note :" d="adminordercreation.bo.default"}</div>
                     <div class="panel-body">
                         <div class="row">
                             {* customer select *}
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>{intl l="Credit note : " d="adminordercreation.bo.default"}</label>
+                                    <label>{intl l="Credit note :" d="adminordercreation.bo.default"}</label>
                                     {$credit_note_id = null}
                                     {form_field field='credit_note_id'}
                                         <select class="form-control js-select-credit-note" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" {if !$order->getCustomer()}disabled{/if}>
+                                            <option value=""></option>
                                             {if $order->getCustomer()}
                                                 {loop type="credit-note" name="credit-note" backend_context=true customer_id=$order->getCustomer()->getId() invoiced=true used=false}
                                                     {if $data == $ID}
@@ -461,7 +459,6 @@
                                                     <option value="{$ID}" {if $ID == $data}selected{/if}>{$REF} - {$INVOICE_REF} : {format_money number=$TOTAL_PRICE_WITH_TAX currency_id=$CURRENCY_ID}</option>
                                                 {/loop}
                                             {/if}
-                                            <option value="" {if !$data}selected{/if}>{intl l="Search..." d="adminordercreation.bo.default"}</option>
                                         </select>
                                     {/form_field}
                                 </div>
@@ -502,26 +499,26 @@
 
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">{intl l="Order Informations : " d="adminordercreation.bo.default"}</div>
+                <div class="panel-heading">{intl l="Order Informations :" d="adminordercreation.bo.default"}</div>
                 <div class="panel-body">
                     <div class="row">
                         <div class="col-md-4 text-center">
                             <h2>
-                                <span>{intl l="Total without tax : " d="adminordercreation.bo.default"}</span><span>
+                                <span>{intl l="Total without tax :" d="adminordercreation.bo.default"}</span><span>
                                     {format_money number=$order->getTotalAmountWithoutTax() currency_id=$order->getCurrency()->getId()} HT
                                 </span>
                             </h2>
                         </div>
                         <div class="col-md-4 text-center">
                             <h2>
-                                <span>{intl l="Tax : " d="adminordercreation.bo.default"}</span><span>
+                                <span>{intl l="Tax :" d="adminordercreation.bo.default"}</span><span>
                                     {format_money number={$order->getTotalAmountWithTax()-$order->getTotalAmountWithoutTax()} currency_id=$order->getCurrency()->getId()}
                                 </span>
                             </h2>
                         </div>
                         <div class="col-md-4 text-center">
                             <h2>
-                                <span>{intl l="Total with tax : " d="adminordercreation.bo.default"}</span><span>
+                                <span>{intl l="Total with tax :" d="adminordercreation.bo.default"}</span><span>
                                     {format_money number=$order->getTotalAmountWithTax() currency_id=$order->getCurrency()->getId()} TTC
                                 </span>
                             </h2>

@@ -1,7 +1,17 @@
 <script type="text/javascript">
-    {loop type="order" name="the-order" id=$order_id customer="*" backend_context=true}
-    $('.general-block-decorator:first > .row:first > div:last').prepend('<button class="btn btn-sm btn-primary" data-customer-id="{$CUSTOMER}" id="btn-create-order" style="margin-left: 10px;">\n' +
+    {loop type="order" name="from-order" id=$order_id customer="*" backend_context=true}
+    {$creditNoteId = null}
+    {loop type="credit-note" name="credit-note" order_id=$ID backend_context=true limit=1 used=false invoiced=true}
+        {$creditNoteId = $ID}
+    {/loop}
+    $('.general-block-decorator:first > .row:first > div:last').prepend('<button class="btn btn-sm btn-primary" {if $creditNoteId != null}data-credit-note-id="{$creditNoteId}"{/if} data-customer-id="{$CUSTOMER}" id="btn-create-order" style="margin-left: 10px;">\n' +
         '    {intl l="Create new order" d="adminordercreation.bo.default"}\n' +
         '</button>');
     {/loop}
 </script>
+<style>
+    .select2-selection__clear {
+        font-size: 20px;
+        color: red;
+    }
+</style>

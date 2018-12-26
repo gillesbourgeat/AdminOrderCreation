@@ -1,42 +1,46 @@
 <tr>
     <td>
         {form_field field='product_id' value_key=$key}
-        {$product_id = $data[$key]}
+        {if $orderProduct}
+            {loop type="product_sale_elements" name="product-sale-element-price-$key" id=$orderProduct->getProductSaleElementsId() currency=$currency_id backend_context=true}
+                {$product_id = $PRODUCT_ID}
+            {/loop}
+        {/if}
+        {$taxRuleId = null}
         <div class="form-group">
             <select class="form-control js-select-product" name="{$name}" data-placeholder="{intl l="Search..." d="adminordercreation.bo.default"}" data-url="{url path="/admin/admin-order-creation/ajax/search/product"}">
                 {if $product_id}
-                    {loop type="product" name="product-$key" id=$product_id visible="*"}
+                    {loop type="product" name="product-$key" id=$product_id visible="*" backend_context=true}
+                        {$taxRuleId = $TAX_RULE_ID}
                         <option value="{$ID}">{$REF} : {$TITLE}</option>
                     {/loop}
                 {/if}
             </select>
         </div>
         {/form_field}
-    </td>
-    <td>
         {form_field field='product_sale_element_id' value_key=$key}
-        <div class="form-group">
-            {if $product_id}
-                {$attributeCombinations = []}
-                {$PSE_first = null}
-                {loop type="product_sale_elements" name="product-sale-element-$key" product=$product_id currency=$currency_id}
+            <div class="form-group">
+                {if $product_id}
+                    {$attributeCombinations = []}
+                    {$PSE_first = null}
+                    {loop type="product_sale_elements" name="product-sale-element-$key" product=$product_id currency=$currency_id backend_context=true}
                     {$PSE_id = $ID}
                     {if !$PSE_first}
                         {$PSE_first = $ID}
                     {/if}
-                    {loop type="attribute_combination" name="attribute-combination-$key" product_sale_elements=$ID}
-                        {$attributeCombinations[$PSE_id][] = $ATTRIBUTE_TITLE|cat:' : '|cat:$ATTRIBUTE_AVAILABILITY_TITLE}
+                    {loop type="attribute_combination" name="attribute-combination-$key" product_sale_elements=$ID backend_context=true}
+                    {$attributeCombinations[$PSE_id][] = $ATTRIBUTE_TITLE|cat:' : '|cat:$ATTRIBUTE_AVAILABILITY_TITLE}
                     {/loop}
-                {/loop}
+                    {/loop}
 
-                {if $attributeCombinations|count}
-                    <select class="form-control js-select-product-sale-element" name="{$name}" >
-                        {loop type="product_sale_elements" name="product-sale-element-$key" product=$product_id currency=$currency_id}
+                    {if $attributeCombinations|count}
+                        <select class="form-control js-select-product-sale-element" name="{$name}" >
+                            {loop type="product_sale_elements" name="product-sale-element-$key" product=$product_id currency=$currency_id}
                             {$selected = false}
-                            {if !$data[$key] and $PSE_first == $ID}
+                            {if !$orderProduct->getProductSaleElementsId() and $PSE_first == $ID}
                                 {$productSaleEmenetIdSelected = $ID}
                                 {$selected = true}
-                            {elseif $data[$key] == $ID}
+                            {elseif $orderProduct->getProductSaleElementsId() == $ID}
                                 {$productSaleEmenetIdSelected = $ID}
                                 {$selected = true}
                             {elseif $PSE_first == $ID}
@@ -44,84 +48,95 @@
                                 {$selected = true}
                             {/if}
 
-                            <option {if $selected}selected{/if} data-quantity="{$QUANTITY}" data-ref="{$REF}" data-color="{if $QUANTITY > 0}#e6ffe6{else}#ffe6e6{/if}" value="{$ID}" >
-                                {', '|implode:$attributeCombinations[$ID]}
-                            </option>
-                        {/loop}
-                    </select>
-                {else}
-                    --
-                    {loop type="product_sale_elements" name="product-sale-element-$key" product=$product_id limit=1 currency=$currency_id}
+                                <option {if $selected}selected{/if} data-quantity="{$QUANTITY}" data-ref="{$REF}" data-color="{if $QUANTITY > 0}#e6ffe6{else}#ffe6e6{/if}" value="{$ID}" >
+                                    {', '|implode:$attributeCombinations[$ID]}
+                                </option>
+                            {/loop}
+                        </select>
+                    {else}
+                        {intl l="Default product sale element" d="adminordercreation.bo.default"}
+
+                        {loop type="product_sale_elements" name="product-sale-element-$key" product=$product_id limit=1 currency=$currency_id backend_context=true}
                         {$productSaleEmenetIdSelected = $ID}
-                        <input type="hidden" value="{$ID}" name="{$name}" />
-                   {/loop}
+                            <input type="hidden" value="{$ID}" name="{$name}" />
+                        {/loop}
+                    {/if}
                 {/if}
-            {/if}
-        </div>
+            </div>
         {/form_field}
     </td>
     <td>
-        {$quantity = 1}
-        {form_field field='product_quantity' value_key=$key}
+        {if $product_id}
+            {if $productSaleEmenetIdSelected}
 
-        {if $data[$key]}
-            {$quantity = {$data[$key]}}
-        {/if}
+                {loop type="product_sale_elements" name="product-sale-element-price-$key" id=$productSaleEmenetIdSelected currency=$currency_id backend_context=true}
+                    {form_field field='refresh_price' value_key=$key}
+                        <input class="js-refresh-price" type="hidden" name="{$name}" value="0" />
+                    {/form_field}
 
-        <div class="form-group">
-            {if $product_id}
-                {loop type="product_sale_elements" name="product-sale-element-quanaity-$key" id=$productSaleEmenetIdSelected currency=$currency_id}
-                <input class="form-control js-action-refresh" type="number" min="1" step="1" max="{$QUANTITY}" name="{$name}" value="{$quantity}" />
+                    {if $orderProduct->getWasInPromo()}
+                        {$priceWithoutTax = $orderProduct->getPromoPrice()}
+                    {else}
+                        {$priceWithoutTax = $orderProduct->getPrice()}
+                    {/if}
+
+                    {$taxes = 0}
+                    {foreach from=$orderProduct->getOrderProductTaxes() item=orderProductTax}
+                        {$taxes = $taxes + $orderProductTax->getAmount()}
+                    {/foreach}
+
+                    {form_field field='product_price_without_tax' value_key=$key}
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input class="form-control js-product-price-without-tax" data-tax-rule-id="{$taxRuleId}"
+                                   data-url="{url path="/admin/product/calculate-raw-price?action=to_tax"}"
+                                   type="number" min="0" step="0.01" name="{$name}" value="{$priceWithoutTax}" />
+                            <div class="input-group-addon">HT</div>
+                        </div>
+                    </div>
+                    {/form_field}
+
+                    {form_field field='product_price_with_tax' value_key=$key}
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input class="form-control js-product-price-with-tax" data-tax-rule-id="{$taxRuleId}"
+                                   data-url="{url path="/admin/product/calculate-raw-price?action=from_tax"}"
+                                   type="number" min="0" step="0.01" name="{$name}" value="{$priceWithoutTax + $taxes}" />
+                            <div class="input-group-addon">TTC</div>
+                        </div>
+                    </div>
+                    {/form_field}
                 {/loop}
             {/if}
-        </div>
-        {/form_field}
+        {/if}
     </td>
     <td>
-        {$reduction = 0}
-        {form_field field='product_reduction' value_key=$key}
-        {if $data[$key]}
-            {$reduction = {$data[$key]}}
-        {/if}
-        <div class="form-group">
-            <input class="form-control js-action-refresh" type="number" min="0" step="0.01" name="{$name}" value="{$reduction}" />
-        </div>
-        {/form_field}
-
-        {$reductionType = 1}
-        {form_field field='product_reduction_type' value_key=$key}
-        {if $data[$key]}
-            {$reductionType = {$data[$key]}}
-        {/if}
-        <div class="form-group">
-            <select class="form-control js-action-refresh" name="{$name}">
-                <option value="1" {if $data[$key] == 1}selected{/if}>{intl l="Percentage" d="adminordercreation.bo.default"}</option>
-                {*<option value="2" {if $data[$key] == 2}selected{/if}>{intl l="Global amount" d="adminordercreation.bo.default"}</option>
-                <option value="3" {if $data[$key] == 3}selected{/if}>{intl l="Unit amount" d="adminordercreation.bo.default"}</option>*}
-            </select>
-        </div>
+        {form_field field='product_quantity' value_key=$key}
+            <div class="form-group">
+                {if $product_id}
+                    {loop type="product_sale_elements" name="product-sale-element-quanaity-$key" id=$productSaleEmenetIdSelected currency=$currency_id backend_context=true}
+                        <input class="form-control js-action-refresh" type="number" min="1" step="1"  name="{$name}" value="{$orderProduct->getQuantity()}" />
+                    {/loop}
+                {/if}
+            </div>
         {/form_field}
     </td>
     <td>
         {if $productSaleEmenetIdSelected}
-        {loop type="product_sale_elements" name="product-sale-element-price-$key" id=$productSaleEmenetIdSelected currency=$currency_id}
-            {if $IS_PROMO}
-                {$price = {admin_order_creation_calc_reduction reduction=$reduction reduction_type=$reductionType price={$PROMO_PRICE + $PROMO_PRICE_TAX} quantity=$quantity}}
-                {$priceWithoutTax = {admin_order_creation_calc_reduction reduction=$reduction reduction_type=$reductionType price=$PROMO_PRICE quantity=$quantity}}
+        {loop type="product_sale_elements" name="product-sale-element-price-$key" id=$productSaleEmenetIdSelected currency=$currency_id backend_context=true}
+            <div class="form-group">
+                <div class="input-group">
+                    <input class="form-control js-action-refresh" type="number" min="0" step="0.01" disabled value="{$priceWithoutTax * $orderProduct->getQuantity()}" />
+                    <div class="input-group-addon">HT</div>
+                </div>
+            </div>
 
-                {format_money number=$price currency_id=$currency_id} TTC / {intl l="unt" d="adminordercreation.bo.default"}
-                <br/>{format_money number={$price * $quantity} currency_id=$currency_id} TTC
-                <br/>{format_money number=$priceWithoutTax currency_id=$currency_id} HT / {intl l="unt" d="adminordercreation.bo.default"}
-                <br/>{format_money number={$priceWithoutTax * $quantity} currency_id=$currency_id} HT
-            {else}
-                {$price = {admin_order_creation_calc_reduction reduction=$reduction reduction_type=$reductionType price={$PRICE + $PRICE_TAX} quantity=$quantity}}
-                {$priceWithoutTax = {admin_order_creation_calc_reduction reduction=$reduction reduction_type=$reductionType price=$PRICE quantity=$quantity}}
-
-                {format_money number=$price currency_id=$currency_id} TTC / {intl l="unt" d="adminordercreation.bo.default"}
-                <br/>{format_money number={$price * $quantity} currency_id=$currency_id} TTC
-                <br/>{format_money number=$priceWithoutTax currency_id=$currency_id} HT / {intl l="unt" d="adminordercreation.bo.default"}
-                <br/>{format_money number={$priceWithoutTax * $quantity} currency_id=$currency_id} HT
-            {/if}
+            <div class="form-group">
+                <div class="input-group">
+                    <input class="form-control js-action-refresh" type="number" min="0" step="0.01" disabled value="{($priceWithoutTax + $taxes) * $orderProduct->getQuantity()}" />
+                    <div class="input-group-addon">TTC</div>
+                </div>
+            </div>
         {/loop}
         {/if}
     </td>

@@ -15,11 +15,16 @@
             $modal.loadAjax(event, getFormData($form, {
                 'admin-order-creation-create[action]': 'refresh'
             }));
-        }, 500, $form);
+        }, 700, $form);
     }
 
-    function initSelect($target){
+    function initSelect($target, allowClear){
+
+        if (typeof allowClear === "undefined") {
+            allowClear = false;
+        }
         return $target.select2({
+            allowClear: allowClear,
             templateResult: function(data){
                 if (!data.id) return data.text;
                 var prefix = data.element.dataset.color ? '<span class="label" style="background-color: ' + data.element.dataset.color + ';width: 50px;">&nbsp;</span>' : '';
@@ -181,7 +186,7 @@
         var $selectProductSaleElement = initSelect($form.find('.js-select-product-sale-element'));
         var $selectInvoiceAddress = initSelect($form.find('.js-select-invoice-address'));
         var $selectDeliveryAddress = initSelect($form.find('.js-select-delivery-address'));
-        var $selectCreditNote = initSelect($form.find('.js-select-credit-note'));
+        var $selectCreditNote = initSelect($form.find('.js-select-credit-note'), true);
 
         $form.on('submit', function(event){
             event.preventDefault();
@@ -217,12 +222,16 @@
         });
 
         $selectProduct.on('select2:select', function(event){
+            $(event.target).parents('tr').find('.js-refresh-price').val('1');
+
             $modal.loadAjax(event, getFormData($form, {
                 'admin-order-creation-create[action]': 'refresh'
             }));
         });
 
         $selectProductSaleElement.on('select2:select', function(event){
+            $(event.target).parents('tr').find('.js-refresh-price').val('1');
+
             $modal.loadAjax(event, getFormData($form, {
                 'admin-order-creation-create[action]': 'refresh'
             }));
@@ -245,6 +254,46 @@
                 refreshWithTimer($form, event);
             }
         });
+
+        var currentProductRequestTax;
+        $form.on('keyup', '.js-product-price-with-tax, .js-product-price-without-tax', function(event){
+            if (currentProductRequestTax) currentProductRequestTax.abort();
+
+            var $th = $(this), $thr = $(this).parents('tr');
+
+            var val = parseFloat($(this).val());
+
+            if (!val) {
+                val = 0;
+            }
+
+            currentProductRequestTax = $.ajax({
+                url: $(this).data('url'),
+                dataType: 'json',
+                data: {
+                    price: val,
+                    tax_rule: this.dataset.taxRuleId
+                }
+            });
+
+            // ajax success
+            currentProductRequestTax.done(function(data){
+                if ($th.hasClass('js-product-price-without-tax')) {
+                    $thr.find('.js-product-price-with-tax').val(data.result);
+                } else {
+                    $thr.find('.js-product-price-without-tax').val(data.result);
+                }
+
+                refreshWithTimer($form, event);
+            });
+
+            // ajax error
+            currentProductRequestTax.fail(function(jqXHR, textStatus){
+                if (jqXHR.statusText === 'abort') return;
+                $modal.displayError(jqXHR, textStatus);
+            });
+        });
+
 
         /***** Product line *****/
         var $tableProductLine = $form.find('.js-table-product-line');
@@ -277,7 +326,7 @@
             $(this).parents('tr').remove();
 
             $modal.loadAjax(event, getFormData($form, {
-                'credit-note-create[action]': 'refresh'
+                'admin-order-creation-create[action]': 'refresh'
             }));
         });
 
@@ -395,13 +444,15 @@
         }, 100, data);
     };
 
-    $('body').on('click', '#btn-create-order', function(){
+    $('body').on('click', '#btn-create-order', function(event){
         $modal.modal('show');
         var customerId = $(this).data('customerId');
+        var creditNoteId = $(this).data('creditNoteId');
 
         $modal.loadAjax(event, {
             'admin-order-creation-create[action]': 'open',
-            'admin-order-creation-create[customer_id]': customerId
+            'admin-order-creation-create[customer_id]': customerId,
+            'admin-order-creation-create[credit_note_id]': creditNoteId
         });
     });
 

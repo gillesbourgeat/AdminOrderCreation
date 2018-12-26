@@ -8,12 +8,6 @@
         <form name="admin-order-creation.create" class="AdminOrderCreation\Form\OrderCreateForm" />
     </forms>
 
-    <services>
-        <service id="adminordercreation.smarty.plugin" class="AdminOrderCreation\Smarty\Plugins\AdminOrderCreation" scope="request">
-            <tag name="thelia.parser.register_plugin"/>
-        </service>
-    </services>
-
     <hooks>
         <hook id="adminordercreation.hook.back.order" class="AdminOrderCreation\Hook\Back\OrderHook">
             <tag name="hook.event_listener" event="orders.table-header" type="back" method="onOrdersTableHeader" />
