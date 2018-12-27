@@ -82,7 +82,11 @@
 
                     {$taxes = 0}
                     {foreach from=$orderProduct->getOrderProductTaxes() item=orderProductTax}
-                        {$taxes = $taxes + $orderProductTax->getAmount()}
+                        {if $orderProduct->getWasInPromo()}
+                            {$taxes = $taxes + $orderProductTax->getPromoAmount()}
+                        {else}
+                            {$taxes = $taxes + $orderProductTax->getAmount()}
+                        {/if}
                     {/foreach}
 
                     {form_field field='product_price_without_tax' value_key=$key}
@@ -90,7 +94,7 @@
                         <div class="input-group">
                             <input class="form-control js-product-price-without-tax" data-tax-rule-id="{$taxRuleId}"
                                    data-url="{url path="/admin/product/calculate-raw-price?action=to_tax"}"
-                                   type="number" min="0" step="0.01" name="{$name}" value="{$priceWithoutTax}" />
+                                   type="number" min="0" step="0.000001" name="{$name}" value="{format_number number=$priceWithoutTax dec_point="." decimals="6"}" />
                             <div class="input-group-addon">HT</div>
                         </div>
                     </div>
@@ -101,7 +105,7 @@
                         <div class="input-group">
                             <input class="form-control js-product-price-with-tax" data-tax-rule-id="{$taxRuleId}"
                                    data-url="{url path="/admin/product/calculate-raw-price?action=from_tax"}"
-                                   type="number" min="0" step="0.01" name="{$name}" value="{$priceWithoutTax + $taxes}" />
+                                   type="number" min="0" step="0.000001" name="{$name}" value="{format_number number=($priceWithoutTax + $taxes) dec_point="." decimals="6"}" />
                             <div class="input-group-addon">TTC</div>
                         </div>
                     </div>
@@ -126,14 +130,14 @@
         {loop type="product_sale_elements" name="product-sale-element-price-$key" id=$productSaleEmenetIdSelected currency=$currency_id backend_context=true}
             <div class="form-group">
                 <div class="input-group">
-                    <input class="form-control js-action-refresh" type="number" min="0" step="0.01" disabled value="{$priceWithoutTax * $orderProduct->getQuantity()}" />
+                    <input class="form-control js-action-refresh" type="number" min="0" step="0.000001" disabled value="{format_number number=($priceWithoutTax * $orderProduct->getQuantity()) dec_point="." decimals="6"}" />
                     <div class="input-group-addon">HT</div>
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="input-group">
-                    <input class="form-control js-action-refresh" type="number" min="0" step="0.01" disabled value="{($priceWithoutTax + $taxes) * $orderProduct->getQuantity()}" />
+                    <input class="form-control js-action-refresh" type="number" min="0" step="0.000001" disabled value="{format_number number=(($priceWithoutTax + $taxes) * $orderProduct->getQuantity()) dec_point="." decimals="6"}" />
                     <div class="input-group-addon">TTC</div>
                 </div>
             </div>

@@ -9,6 +9,7 @@ use CreditNote\Model\CreditNoteAddress;
 use CreditNote\Model\CreditNoteDetail;
 use CreditNote\Model\CreditNoteQuery;
 use CreditNote\Model\CreditNoteStatusQuery;
+use CreditNote\Model\CreditNoteTypeQuery;
 use CreditNote\Model\OrderCreditNote;
 use InvoiceRef\EventListeners\OrderListener;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
@@ -39,6 +40,7 @@ use Thelia\Model\OrderStatusQuery;
 use Thelia\Model\Product;
 use Thelia\Model\ProductI18n;
 use Thelia\Model\ProductQuery;
+use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Model\TaxRuleI18n;
 use Thelia\Tools\I18n;
 
@@ -401,7 +403,11 @@ class OrderController extends BaseAdminController
 
                 $newCreditNote = (new CreditNote())
                     ->setCurrency($creditNote->getCurrency())
-                    ->setTypeId(4)
+                    ->setTypeId(
+                        CreditNoteTypeQuery::create()
+                        ->filterByCode('difference_refund')
+                        ->findOne()->getId()
+                    )
                     ->setStatusId(4)
                     ->setCreditNoteAddress($invoiceAddress)
                     ->addCreditNoteDetail($crediNoteDetail)
@@ -603,12 +609,24 @@ class OrderController extends BaseAdminController
             $productSaleElementsLoop = new ProductSaleElements($this->container);
 
             if (isset($productSaleElementIds[$key])) {
-                $productSaleElementsLoop->initializeArgs([
-                    'name' => 'product_sale_elements',
-                    'type' => 'product_sale_elements',
-                    'id' => $productSaleElementIds[$key],
-                    'currency' => $currency->getId()
-                ]);
+                if (null !== ProductSaleElementsQuery::create()
+                        ->filterByProductId($product->getId())
+                        ->filterById($productSaleElementIds[$key])
+                        ->findOne()) {
+                    $productSaleElementsLoop->initializeArgs([
+                        'name' => 'product_sale_elements',
+                        'type' => 'product_sale_elements',
+                        'id' => $productSaleElementIds[$key],
+                        'currency' => $currency->getId()
+                    ]);
+                } else {
+                    $productSaleElementsLoop->initializeArgs([
+                        'name' => 'product_sale_elements',
+                        'type' => 'product_sale_elements',
+                        'product' => $product->getId(),
+                        'currency' => $currency->getId()
+                    ]);
+                }
             } else {
                 $productSaleElementsLoop->initializeArgs([
                     'name' => 'product_sale_elements',

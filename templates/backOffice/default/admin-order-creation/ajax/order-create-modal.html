@@ -472,9 +472,10 @@
                                             amount={format_money number=$TOTAL_PRICE_WITH_TAX currency_id=$CURRENCY_ID}
                                             }
                                         </div>
-                                        {if $order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX == 0}
+                                        {$diffAmount = ($order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX)|round:2}
+                                        {if $diffAmount == 0}
 
-                                        {elseif $order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX > 0}
+                                        {elseif $diffAmount > 0}
                                             <div class="alert alert-warning">
                                                 {intl l="Your customer will have to pay the difference of %amount with tax" d="adminordercreation.bo.default"
                                                 amount={format_money number={$order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX} currency_id=$CURRENCY_ID}
