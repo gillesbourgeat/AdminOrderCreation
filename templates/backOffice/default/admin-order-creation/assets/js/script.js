@@ -187,6 +187,8 @@
         var $selectInvoiceAddress = initSelect($form.find('.js-select-invoice-address'));
         var $selectDeliveryAddress = initSelect($form.find('.js-select-delivery-address'));
         var $selectCreditNote = initSelect($form.find('.js-select-credit-note'), true);
+        var $selectCreditNoteStatus = initSelect($form.find('.js-select-credit-note-status'));
+        var $selectCreditNoteType = initSelect($form.find('.js-select-credit-note-type'));
 
         $form.on('submit', function(event){
             event.preventDefault();

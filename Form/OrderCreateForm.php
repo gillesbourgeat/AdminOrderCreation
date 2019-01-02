@@ -201,6 +201,13 @@ class OrderCreateForm extends BaseForm
         $this->formBuilder
             ->add('credit_note_id', IntegerType::class, array(
                 'required' => false
-            ));
+            ))
+            ->add('credit_note_type_id', IntegerType::class, array(
+                'required' => false
+            ))
+            ->add('credit_note_status_id', IntegerType::class, array(
+                'required' => false
+            ))
+            ;
     }
 }

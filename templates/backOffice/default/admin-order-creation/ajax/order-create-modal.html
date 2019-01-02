@@ -56,12 +56,21 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label>{intl l="Status :" d="adminordercreation.bo.default"}</label>
+                {$ignoreStatus = false}
+                {form_field field='credit_note_id'}
+                    {if $data}
+                        {$ignoreStatus = true}
+                    {/if}
+                {/form_field}
+
                 {form_field field='status_id'}
                     <select class="form-control js-select-status" name="{$name}">
                         {loop type="order-status" name="order-status"}
+                            {if !$ignoreStatus || ($ignoreStatus && $ID > 2)}
                             <option value="{$ID}" {if $order->getStatusId() == $ID}selected{/if} data-color="{$COLOR}">
                                 {if $TITLE}{$TITLE}{else}{$CODE}{/if}
                             </option>
+                            {/if}
                         {/loop}
                     </select>
                 {/form_field}
@@ -468,7 +477,7 @@
                                     {loop type="credit-note" name="credit-note" backend_context=true id=$credit_note_id}
                                         <div class="alert alert-info">
                                             {intl l="This command uses the credit note ref %ref for the amount of %amount with tax." d="adminordercreation.bo.default"
-                                            ref=$INVOICE_REF
+                                            ref=$REF
                                             amount={format_money number=$TOTAL_PRICE_WITH_TAX currency_id=$CURRENCY_ID}
                                             }
                                         </div>
@@ -486,6 +495,42 @@
                                                 {intl l="A new credit note of %amount with tax will be issued for this customer." d="adminordercreation.bo.default"
                                                 amount={format_money number=-{$order->getTotalAmountWithTax() - $TOTAL_PRICE_WITH_TAX} currency_id=$CURRENCY_ID}
                                                 }
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>{intl l="Status of new credit note :" d="adminordercreation.bo.default"}</label>
+                                                        {form_field field='credit_note_status_id'}
+                                                            {if !$data}
+                                                                {$data = $configNewCreditNoteStatusId}
+                                                            {/if}
+                                                            <select class="form-control js-select-credit-note-status" name="{$name}" {if $invoiced}disabled{/if}>
+                                                                {loop type="credit-note-status" name="credit-note-status" invoiced=true}
+                                                                    <option value="{$ID}" data-color="{$COLOR}" {if $data == $ID}selected{/if}>
+                                                                        {if $TITLE}{$TITLE}{else}{$CODE}{/if}
+                                                                    </option>
+                                                                {/loop}
+                                                            </select>
+                                                        {/form_field}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>{intl l="Type of new credit note :" d="adminordercreation.bo.default"}</label>
+                                                        {form_field field='credit_note_type_id'}
+                                                            {if !$data}
+                                                                {$data = $configNewCreditNoteTypeId}
+                                                            {/if}
+                                                            <select class="form-control js-select-credit-note-type" name="{$name}" {if $invoiced}disabled{/if}>
+                                                                {loop type="credit-note-type" name="credit-note-type"}
+                                                                    <option value="{$ID}" data-color="{$COLOR}" {if $data == $ID}selected{/if}>
+                                                                        {if $TITLE}{$TITLE}{else}{$CODE}{/if}
+                                                                    </option>
+                                                                {/loop}
+                                                            </select>
+                                                        {/form_field}
+                                                    </div>
+                                                </div>
                                             </div>
                                         {/if}
                                     {/loop}
@@ -512,7 +557,7 @@
                         </div>
                         <div class="col-md-4 text-center">
                             <h2>
-                                <span>{intl l="Tax :" d="adminordercreation.bo.default"}</span><span>
+                                <span>{intl l="Total tax :" d="adminordercreation.bo.default"}</span><span>
                                     {format_money number={$order->getTotalAmountWithTax()-$order->getTotalAmountWithoutTax()} currency_id=$order->getCurrency()->getId()}
                                 </span>
                             </h2>

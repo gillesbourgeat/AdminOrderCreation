@@ -8,6 +8,7 @@
 
 namespace AdminOrderCreation\Controller;
 
+use AdminOrderCreation\AdminOrderCreation;
 use AdminOrderCreation\Util\Calc;
 use AdminOrderCreation\Util\CriteriaSearchTrait;
 use CreditNote\Model\CreditNote;
@@ -108,10 +109,6 @@ class OrderController extends BaseAdminController
             );
 
             $order->save();
-
-        /*    return $this->generateRedirectFromRoute('admin.order.update.view', [], [
-                'order_id' => $order->getId()
-            ]);*/
         }
 
         if ($order->getId()) {
@@ -122,6 +119,8 @@ class OrderController extends BaseAdminController
             return $this->render('admin-order-creation/ajax/order-create-modal', [
                 'order' => $order,
                 'hasCreditNoteModule' => $this->hasCreditNoteModule(),
+                'configNewCreditNoteStatusId' => AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_DEFAULT_NEW_CREDIT_NOTE_STATUS_ID),
+                'configNewCreditNoteTypeId' => AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_DEFAULT_NEW_CREDIT_NOTE_TYPE_ID)
             ]);
         }
     }
@@ -360,6 +359,10 @@ class OrderController extends BaseAdminController
 
         $creditNoteId = $form->get('credit_note_id')->getData();
 
+        $creditNoteStatusId = $form->get('credit_note_status_id')->getData();
+
+        $creditNoteTypeId = $form->get('credit_note_type_id')->getData();
+
         if ($creditNoteId && $action === 'create') {
             /** @var CreditNote $creditNote */
             $creditNote = CreditNoteQuery::create()
@@ -409,12 +412,8 @@ class OrderController extends BaseAdminController
 
                 $newCreditNote = (new CreditNote())
                     ->setCurrency($creditNote->getCurrency())
-                    ->setTypeId(
-                        CreditNoteTypeQuery::create()
-                        ->filterByCode('difference_refund')
-                        ->findOne()->getId()
-                    )
-                    ->setStatusId(4)
+                    ->setTypeId($creditNoteTypeId)
+                    ->setStatusId($creditNoteStatusId)
                     ->setCreditNoteAddress($invoiceAddress)
                     ->addCreditNoteDetail($crediNoteDetail)
                     ->setTotalPrice(-($order->getTotalAmountWithTax() - $creditNote->getTotalPriceWithTax()))
@@ -434,27 +433,24 @@ class OrderController extends BaseAdminController
 
             $newStatus = CreditNoteStatusQuery::findNextCreditNoteUsedStatus($creditNote->getCreditNoteStatus());
 
-            // on passe par le statut payé
-            $order->setOrderStatus(
-                OrderStatusQuery::create()->findOneById(2)
-            );
+            if ($order->getOrderStatus()->getId() > 2) {
+                // on passe par le statut payé
+                $order->setOrderStatus(
+                    OrderStatusQuery::create()->findOneById(2)
+                );
 
-            $order->save();
-            // @todo
-            if (class_exists('\InvoiceRef\EventListeners\OrderListener')) {
-                // pour générer la référence commande
-                // on peut pas dispatcher l'event car crédit de fidélité crédité
-                $orderListener = new OrderListener();
+                $order->save();
 
-                //$orderListener->implementInvoice(new OrderEvent($order));
+                if (class_exists('\InvoiceRef\EventListeners\OrderListener')) {
+                    // pour générer la référence commande
+                    // on peut pas dispatcher l'event car crédit de fidélité crédité
+                    $orderListener = new OrderListener();
+
+                    $orderListener->implementInvoice(new OrderEvent($order));
+                }
+
+                $order->save();
             }
-
-            // on passe en traitement
-            $order->setOrderStatus(
-                OrderStatusQuery::create()->findOneById(3)
-            );
-
-            $order->save();
 
             $creditNote->setCreditNoteStatus($newStatus);
             $creditNote->save();
@@ -756,7 +752,8 @@ class OrderController extends BaseAdminController
 
     /**
      * @param ActiveRecordInterface $model
-     * @return mixed
+     * @return string
+     * @throws \Propel\Runtime\Exception\PropelException
      */
     protected function formatAddress(ActiveRecordInterface $model)
     {
