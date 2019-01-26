@@ -1,0 +1,130 @@
+{* Set the default translation domain, that will be used by {intl} when the 'd' parameter is not set *}
+{default_translation_domain domain='bo.default'}
+
+<div class="row">
+    <div class="col-md-12 general-block-decorator">
+
+        {if $acceptedLicence}
+            <div class="alert alert-success text-center">
+                Vous avez accepté les conditions d'utilisations, vous pouvez dès maintenant utiliser le module
+                AdminOrderCreation
+                <br/>
+                <br/>
+                <br/>
+                <a href="{url path="/admin/orders"}" class="btn btn-primary">
+                    Commencer à utiliser le module
+                </a>
+            </div>
+        {else}
+            <div style="height: 500px;overflow-y: auto;max-width: 700px;margin: 0 auto;">
+                <div class="contenu-extrait-article">
+
+                    <h1 class="text-center">Conditions d'utilisations</h1>
+
+                    <p>
+                        Editeur : Gilles Bourgeat
+                        <br/>
+                        E-mail : gilles.bourgeat@gmail.com
+                        <br/>
+                        Licence : propriétaire
+                    </p>
+                    <p>
+                        Une licence d'utilisation est accordée pour un seul site web. Pour utiliser le module AdminOrderCreation sur plusieurs sites web,
+                        vous devez vous acquitter de l'achat d'autant de licences que de sites web sur lesquels vous souhaitez l'utiliser.
+                    </p>
+                    <p>
+                        Il est interdit de revendiquer une quelconque propriété intellectuelle ou exclusive, ou de s'approprier la paternité du module AdminOrderCreation, modifiées ou non.
+                        <br/>
+                        Il est également strictement interdit de redistribuer le module AdminOrderCreation sans autorisation à titre payant ou gratuit, modifiées ou non.
+                    </p>
+                    <p>
+                        Merci de vérifier que vous avez acquis légalement une licence du module AdminOrderCreation pour ce site web
+                        <br/>
+                        Si ce n'est pas le cas, merci d'envoyer une demande de licence à l'adresse e-mail de l'éditeur.
+                    </p>
+                    <h2>
+                        Version d'évaluation
+                    </h2>
+                    <p>
+                        Il est possible d'utiliser le module AdminOrderCreation sur une période de 15 jours sans licence à partir du moment ou les conditions d'utilisation ont été acceptées.
+                        <br/>
+                        Si vous souhaitez continuer à utiliser le module AdminOrderCreation au-delà de cette période, merci de faire l'acquisition d'une licence.
+                    </p>
+                    <h2>Espace d'intégration / développement / teste </h2>
+                    <p>
+                        Si vous utilisez le module AdminOrderCreation sur un nom de domaine d'intégration / développement / teste, aucune licence n'est nécessaire.
+                        <br/>
+                        Seul le site web de production nécessite l'acquisition d'une licence.
+                    </p>
+                    <h2>
+                        Bug et nouvelle fonctionnalité
+                    </h2>
+                    <p>
+                        Pour signaler un bug ou faire une demande de nouvelle fonctionnalité pour le module AdminOrderCreation,
+                        merci d'envoyer un e-mail à l'adresse de l'éditeur.
+                        <br/>
+                        Les modifications du module AdminOrderCreation liés à cette demande seront faits sous réserve d'acceptation de l'éditeur.
+                    </p>
+                    <h2>
+                        Compatibilité
+                    </h2>
+                    <p>
+                        La licence du module AdminOrderCreation est fournie pour un Thelia version 2.3 ou 2.4,
+                        si vous souhaitez une compatibilité inférieure à Thelia 2.3, merci de faire une demande à l'adresse e-mail l'éditeur.
+                        <br/>
+                        Les modifications du module AdminOrderCreation liés à cette demande seront faites sous réserve d'acceptation de l'éditeur.
+                    </p>
+                    <h2>
+                        Demande de remboursement
+                    </h2>
+                    <p>
+                        Aucune demande de remboursement de la licence ne sera acceptée une fois la période d'évaluation passée.
+                    </p>
+                    <h2>
+                        RGPD
+                    </h2>
+                    <b>Informations récoltés une fois les conditions d'utilisations du module acceptés</b>
+                    <ul>
+                        <li>Nom du domaine ou le module est utilisé</li>
+                        <li>Numéro de version du Thelia</li>
+                        <li>Numéro de version du module</li>
+                        <li>La langue dans laquelle est utilisé le module</li>
+                    </ul>
+                    <p>
+                        Le module AdminOrderCreation ne récupère aucune autre donnée liée à votre boutique Thelia
+                    </p>
+                    <b>Pourquoi ces données sont elles récupérées</b>
+                    <p>
+                        Ces données sont récupérées afin de pouvoir vous informer
+                        des mises à jours disponibles pour le module AdminOrderCreation
+                        et vérifier que vous avez acquis légalement le module AdminOrderCreation.
+                    </p>
+                    <b>Distribution ou vente des données récoltés</b>
+                    <p>
+                        L'éditeur s'engage à ne pas distribuer ou vendre les données récoltées.
+                    </p>
+                    <b>Publicité ou annonce</b>
+                    <p>
+                        Le module AdminOrderCreation peut vous proposer des modules pouvant vous aidez à gérer votre boutique Thelia.
+                        <br/>
+                        Ces propositions restent rares et non intrusives
+                    </p>
+                    <b>Pour vos CGU</b>
+                    <p>
+                        Le module AdminOrderCreation utilise les fonctionnalités du code sources de thelia et ne stock aucune autre information en base de données
+                        <br/>
+                        Vous n'avez donc pas besoin de mettre à jour vos CGU suite à l'utilisation du module AdminOrderCreation.
+                    </p>
+                </div>
+            </div>
+
+            <br/>
+            <br/>
+            <div class="text-center">
+                <a class="btn btn-primary" href="{url current=true}?accept=1">
+                    J'accepte les conditions d'utilisations
+                </a>
+            </div>
+        {/if}
+    </div>
+</div>

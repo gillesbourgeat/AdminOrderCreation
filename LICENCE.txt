@@ -5,27 +5,27 @@ Licence : propriétaire
 
 Une licence d'utilisation est accordée pour un seul site web. Pour utiliser le module AdminOrderCreation sur plusieurs sites web, vous devez vous acquitter de l'achat d'autant de licences que de sites web sur lesquels vous souhaitez l'utiliser.
 
-Il est interdit de revendiquer une quelconque propriété intellectuelle ou exclusive, ou de s'approprier la paternité du module EasyProductManager, modifiées ou non.
-Il est également strictement interdit de redistribuer le module EasyProductManager sans autorisation à titre payant ou gratuit, modifiées ou non.
+Il est interdit de revendiquer une quelconque propriété intellectuelle ou exclusive, ou de s'approprier la paternité du module AdminOrderCreation, modifiées ou non.
+Il est également strictement interdit de redistribuer le module AdminOrderCreation sans autorisation à titre payant ou gratuit, modifiées ou non.
 
-Merci de vérifier que vous avez acquis légalement une licence du module EasyProductManager pour ce site web
+Merci de vérifier que vous avez acquis légalement une licence du module AdminOrderCreation pour ce site web
 Si ce n'est pas le cas, merci d'envoyer une demande de licence à l'adresse e-mail de l'éditeur.
 
 Version d'évaluation
-Il est possible d'utiliser le module EasyProductManager sur une période de 15 jours sans licence à partir du moment ou les conditions d'utilisation ont été acceptées.
-Si vous souhaitez continuer à utiliser le module EasyProductManager au-delà de cette période, merci de faire l'acquisition d'une licence.
+Il est possible d'utiliser le module AdminOrderCreation sur une période de 15 jours sans licence à partir du moment ou les conditions d'utilisation ont été acceptées.
+Si vous souhaitez continuer à utiliser le module AdminOrderCreation au-delà de cette période, merci de faire l'acquisition d'une licence.
 
 Espace d'intégration / développement / teste
-Si vous utilisez le module EasyProductManager sur un nom de domaine d'intégration / développement / teste, aucune licence n'est nécessaire.
+Si vous utilisez le module AdminOrderCreation sur un nom de domaine d'intégration / développement / teste, aucune licence n'est nécessaire.
 Seul le site web de production nécessite l'acquisition d'une licence.
 
 Bug et nouvelle fonctionnalité
-Pour signaler un bug ou faire une demande de nouvelle fonctionnalité pour le module EasyProductManager, merci d'envoyer un e-mail à l'adresse de l'éditeur.
-Les modifications du module EasyProductManager liés à cette demande seront faits sous réserve d'acceptation de l'éditeur.
+Pour signaler un bug ou faire une demande de nouvelle fonctionnalité pour le module AdminOrderCreation, merci d'envoyer un e-mail à l'adresse de l'éditeur.
+Les modifications du module AdminOrderCreation liés à cette demande seront faits sous réserve d'acceptation de l'éditeur.
 
 Compatibilité
-La licence du module EasyProductManager est fournie pour un Thelia version 2.3 ou 2.4, si vous souhaitez une compatibilité inférieure à Thelia 2.3, merci de faire une demande à l'adresse e-mail l'éditeur.
-Les modifications du module EasyProductManager liés à cette demande seront faites sous réserve d'acceptation de l'éditeur.
+La licence du module AdminOrderCreation est fournie pour un Thelia version 2.3 ou 2.4, si vous souhaitez une compatibilité inférieure à Thelia 2.3, merci de faire une demande à l'adresse e-mail l'éditeur.
+Les modifications du module AdminOrderCreation liés à cette demande seront faites sous réserve d'acceptation de l'éditeur.
 
 Demande de remboursement
 Aucune demande de remboursement de la licence ne sera acceptée une fois la période d'évaluation passée.
@@ -36,18 +36,18 @@ Nom du domaine ou le module est utilisé
 Numéro de version du Thelia
 Numéro de version du module
 La langue dans laquelle est utilisé le module
-Le module EasyProductManager ne récupère aucune autre donnée liée à votre boutique Thelia
+Le module AdminOrderCreation ne récupère aucune autre donnée liée à votre boutique Thelia
 
 Pourquoi ces données sont elles récupérées
-Ces données sont récupérées afin de pouvoir vous informer des mises à jours disponibles pour le module EasyProductManager et vérifier que vous avez acquis légalement le module EasyProductManager.
+Ces données sont récupérées afin de pouvoir vous informer des mises à jours disponibles pour le module AdminOrderCreation et vérifier que vous avez acquis légalement le module AdminOrderCreation.
 
 Distribution ou vente des données récoltés
 L'éditeur s'engage à ne pas distribuer ou vendre les données récoltées.
 
 Publicité ou annonce
-Le module EasyProductManager peut vous proposer des modules pouvant vous aidez à gérer votre boutique Thelia.
+Le module AdminOrderCreation peut vous proposer des modules pouvant vous aidez à gérer votre boutique Thelia.
 Ces propositions restent rares et non intrusives
 
 Pour vos CGU
-Le module EasyProductManager n'enregistre aucune donnée liée à vos clients.
-Vous n'avez donc pas besoin de mettre à jour vos CGU suite à l'utilisation du module EasyProductManager.
+Le module CreditNote utilise les fonctionnalités du code sources de thelia et ne stock aucune autre information en base de données
+Vous n'avez donc pas besoin de mettre à jour vos CGU suite à l'utilisation du module CreditNote.

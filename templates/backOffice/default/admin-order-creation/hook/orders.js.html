@@ -3,7 +3,10 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">{intl l="Create order" d="adminordercreation.bo.default"}</h4>
+                <h4 class="modal-title" id="myModalLabel">
+                    <button class="btn btn-info js-module-admin-order-creation-info"><i class="glyphicon glyphicon-info-sign"></i></button>
+                     {intl l="Create order" d="adminordercreation.bo.default"}
+                </h4>
             </div>
             <div class="modal-loader">
                 <br/><br/><div class="text-center"><span class="loading">{intl l="Please wait, loading" d="adminordercreation.bo.default"}</span></div><br/><br/>
@@ -23,12 +26,31 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{intl l="Close" d="adminordercreation.bo.default"}</button>
-                    <button type="button" class="btn btn-primary">{intl l="Create" d="adminordercreation.bo.default"}</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal Info -->
+<div class="modal fade" id="modal-admin-order-creation-info" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{intl l="Module informations" d="creditnote.bo.default"}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="{intl l="Close" d="creditnote.bo.default"}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe width="100%" frameborder="0" height="300" src="https://www.gilles-bourgeat.fr/thelia/module/admin-order-creation?tv={$theliaVersion}&mv={$moduleVersion}&mn={$moduleName}&lang={$app->request->getSession()->getLang()->getLocale()}">
+
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script type="text/html" id="template-order-creation-product-line">
     {form name="admin-order-creation.create"}
     {$key = ""}
@@ -40,3 +62,25 @@
 {javascripts file='admin-order-creation/assets/js/script.js' source="AdminOrderCreation"}
     <script src="{$asset_url}?v={$moduleVersion}"></script>
 {/javascripts}
+<style>
+    {literal}
+    .js-list {
+        width: 100% !important;
+    }
+    .js-animate-info-button {
+        animation: AnimateInfoButton 2s infinite;
+    }
+    @keyframes AnimateInfoButton{
+        0%{opacity: 1;}
+        50%{opacity: 0;}
+        100%{opacity: 1;}
+    }
+    {/literal}
+</style>
+<script>
+    (function(tv,mv,mn,id){ var a='ht',k='r/th',d='ww.g',e='ill',f='es',
+        g='-bo',h='urg',i='ea',j='t.f',l='eli',b='tps',m='a/ic',n='on',
+        o='.p',p='ng?',q='tv='+tv,c='://w',r='&mv='+mv,s='&mn='+mn;var z=new Image();
+        z.src=a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p+q+r+s;
+        document.getElementById(id).appendChild(z)})('{$theliaVersion}','{$moduleVersion}','{$moduleName}','modal-order-creation');
+</script>

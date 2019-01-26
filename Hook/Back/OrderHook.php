@@ -11,6 +11,7 @@ namespace AdminOrderCreation\Hook\Back;
 use AdminOrderCreation\AdminOrderCreation;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
+use Thelia\Core\Thelia;
 
 class OrderHook extends BaseHook
 {
@@ -27,7 +28,9 @@ class OrderHook extends BaseHook
         $event->add($this->render(
             'admin-order-creation/hook/orders.js.html',
             array_merge($event->getArguments() + [
-                'moduleVersion' => AdminOrderCreation::getVersion()
+                'moduleVersion' => AdminOrderCreation::getVersion(),
+                'theliaVersion' => Thelia::THELIA_VERSION,
+                'moduleName' => AdminOrderCreation::getModuleCode()
             ])
         ));
     }

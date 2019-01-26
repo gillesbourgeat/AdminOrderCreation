@@ -39,6 +39,16 @@ class AdminOrderCreation extends BaseModule
         }
     }
 
+    public static function checkLicence()
+    {
+        return static::getConfigValue('licenceVersion', '') === self::getVersion();
+    }
+
+    public static function acceptLicence()
+    {
+        static::setConfigValue('licenceVersion', self::getVersion());
+    }
+
     public static function getVersion()
     {
         return ModuleQuery::create()->findOneByCode(self::getModuleCode())->getVersion();

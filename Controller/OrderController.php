@@ -23,10 +23,13 @@ use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Propel;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\Security\AccessManager;
+use Thelia\Core\Security\Resource\AdminResources;
 use Thelia\Core\Template\Loop\ProductSaleElements;
 use Thelia\Model\AddressQuery;
 use Thelia\Model\Cart;
@@ -50,6 +53,7 @@ use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Model\TaxRuleI18n;
 use Thelia\Tools\I18n;
+use Thelia\Tools\URL;
 
 class OrderController extends BaseAdminController
 {
@@ -57,6 +61,18 @@ class OrderController extends BaseAdminController
 
     public function ajaxModalCreateAction(Request $request)
     {
+        if (!AdminOrderCreation::checkLicence()) {
+            return new RedirectResponse(
+                URL::getInstance()->absoluteUrl(
+                    '/admin/admin-order-creation/licence'
+                )
+            );
+        }
+
+        if (null !== $response = $this->checkAuth(AdminResources::ORDER, [], AccessManager::CREATE)) {
+            return $response;
+        }
+
         $order = new Order();
 
         $order->setLang($this->getLang());
@@ -132,6 +148,10 @@ class OrderController extends BaseAdminController
      */
     public function ajaxSearchCustomerAction(Request $request)
     {
+        if (null !== $response = $this->checkAuth(AdminResources::ORDER, [], AccessManager::CREATE)) {
+            return $response;
+        }
+
         $customerQuery = CustomerQuery::create()
             ->innerJoinAddress()
             ->groupById()
@@ -181,6 +201,10 @@ class OrderController extends BaseAdminController
      */
     public function ajaxSearchProductAction(Request $request)
     {
+        if (null !== $response = $this->checkAuth(AdminResources::ORDER, [], AccessManager::CREATE)) {
+            return $response;
+        }
+
         $productQuery = ProductQuery::create();
 
         $productQuery->useI18nQuery(

@@ -461,4 +461,18 @@
     $modal.on('hidden.bs.modal', function(){
         $modal.reset();
     });
+
+    $('.js-module-admin-order-creation-info').on('click', function(){
+        $('#modal-admin-order-creation-info').modal('show');
+        $(this).removeClass('js-animate-info-button');
+    });
+
+    window.addEventListener("message", function(event){
+        if (event.origin === "https://www.gilles-bourgeat.fr" && event.data === 'new') {
+            $(document).ready(function(){
+                $('.js-module-admin-order-creation-info').addClass('js-animate-info-button');
+            });
+        }
+    }, false);
+
 }());

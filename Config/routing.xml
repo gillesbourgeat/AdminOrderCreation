@@ -16,4 +16,8 @@
         <default key="_controller">AdminOrderCreation:Order:ajaxSearchProduct</default>
     </route>
 
+    <route id="adminordercreation.licence" path="/admin/admin-order-creation/licence" methods="GET">
+        <default key="_controller">AdminOrderCreation:Licence:licence</default>
+    </route>
+
 </routes>
