@@ -66,7 +66,7 @@
                 {form_field field='status_id'}
                     <select class="form-control js-select-status" name="{$name}">
                         {loop type="order-status" name="order-status"}
-                            {if !$ignoreStatus || ($ignoreStatus && $ID > 2)}
+                            {if !$ignoreStatus || ($ignoreStatus && $ID >= {$configPayedOrderMinimumStatusId})}
                             <option value="{$ID}" {if $order->getStatusId() == $ID}selected{/if} data-color="{$COLOR}">
                                 {if $TITLE}{$TITLE}{else}{$CODE}{/if}
                             </option>

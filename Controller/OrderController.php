@@ -110,21 +110,58 @@ class OrderController extends BaseAdminController
 
                 $order->setCartId($cart->getId());
 
+                // on passe par le statut par défault
+                $order->setOrderStatus(
+                    OrderStatusQuery::create()->findOneById(1)
+                );
+
                 $order->save();
+
                 $this->performCreditNote($order, $formValidate);
+
+                $orderStatusId = $formValidate->get('status_id')->getData();
+
+                if ((int) $orderStatusId >= 2) {
+                    if ((int) AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_INVOICE_REF_TYPE) === 0) {
+                        // pour retirer les stocks et générer la référence facture
+                        $order->setOrderStatus(
+                            OrderStatusQuery::create()->findOneById(2)
+                        );
+
+                        $this->getDispatcher()->dispatch(
+                            TheliaEvents::ORDER_UPDATE_STATUS,
+                            (new OrderEvent($order))->setStatus(2)
+                        );
+
+                        $order->save();
+                    } else { // dans le cas d'une facturation à par
+                        $order->setInvoiceRef((int) AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_INVOICE_REF_INCREMENT));
+
+                        AdminOrderCreation::setConfigValue(
+                            AdminOrderCreation::CONFIG_KEY_INVOICE_REF_INCREMENT,
+                            (int) AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_INVOICE_REF_INCREMENT) + 1
+                        );
+
+                        $order->setOrderStatus(
+                            OrderStatusQuery::create()->findOneById(2)
+                        );
+                        $order->save();
+                    }
+                }
+
+                if ((int) $orderStatusId > 2) {
+                    $order->setOrderStatus(
+                        OrderStatusQuery::create()->findOneById((int) $orderStatusId)
+                    );
+                }
+
+                $order->save();
+
                 $con->commit();
             } catch (\Exception $e) {
                 $con->rollBack();
                 throw $e;
             }
-
-            // pour retirer les stocks et générer la référence facture
-            $this->getDispatcher()->dispatch(
-                TheliaEvents::ORDER_UPDATE_STATUS,
-                (new OrderEvent($order))->setStatus($order->getStatusId())
-            );
-
-            $order->save();
         }
 
         if ($order->getId()) {
@@ -136,7 +173,8 @@ class OrderController extends BaseAdminController
                 'order' => $order,
                 'hasCreditNoteModule' => $this->hasCreditNoteModule(),
                 'configNewCreditNoteStatusId' => AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_DEFAULT_NEW_CREDIT_NOTE_STATUS_ID),
-                'configNewCreditNoteTypeId' => AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_DEFAULT_NEW_CREDIT_NOTE_TYPE_ID)
+                'configNewCreditNoteTypeId' => AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_DEFAULT_NEW_CREDIT_NOTE_TYPE_ID),
+                'configPayedOrderMinimumStatusId' => AdminOrderCreation::getConfigValue(AdminOrderCreation::CONFIG_KEY_PAYED_ORDER_MINIMUM_STATUS_ID)
             ]);
         }
     }
@@ -349,7 +387,7 @@ class OrderController extends BaseAdminController
             );
         } else {
             $order->setOrderStatus(
-                OrderStatusQuery::create()->findOne()
+                OrderStatusQuery::create()->findOneById(1)
             );
         }
 
@@ -456,25 +494,6 @@ class OrderController extends BaseAdminController
             $orderCreditNote->save();
 
             $newStatus = CreditNoteStatusQuery::findNextCreditNoteUsedStatus($creditNote->getCreditNoteStatus());
-
-            if ($order->getOrderStatus()->getId() > 2) {
-                // on passe par le statut payé
-                $order->setOrderStatus(
-                    OrderStatusQuery::create()->findOneById(2)
-                );
-
-                $order->save();
-
-                if (class_exists('\InvoiceRef\EventListeners\OrderListener')) {
-                    // pour générer la référence commande
-                    // on peut pas dispatcher l'event car crédit de fidélité crédité
-                    $orderListener = new OrderListener();
-
-                    $orderListener->implementInvoice(new OrderEvent($order));
-                }
-
-                $order->save();
-            }
 
             $creditNote->setCreditNoteStatus($newStatus);
             $creditNote->save();
