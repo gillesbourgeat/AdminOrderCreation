@@ -153,6 +153,10 @@ class OrderController extends BaseAdminController
                     $order->setOrderStatus(
                         OrderStatusQuery::create()->findOneById((int) $orderStatusId)
                     );
+                    $this->getDispatcher()->dispatch(
+                        TheliaEvents::ORDER_UPDATE_STATUS,
+                        (new OrderEvent($order))->setStatus((int) $orderStatusId)
+                    );
                 }
 
                 $order->save();
